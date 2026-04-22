@@ -32,13 +32,13 @@ export default function Compare() {
     >
       <div
         style={{
-          background: 'white',
-          borderRadius: '20px',
+          background: 'var(--card-bg)',
+          borderRadius: 'var(--radius-lg)',
           padding: '56px 48px',
           maxWidth: '560px',
           width: '100%',
-          boxShadow: '0 8px 40px rgba(37, 99, 235, 0.09), 0 0 0 1px rgba(37, 99, 235, 0.07)',
-          border: '1px solid rgba(37, 99, 235, 0.1)',
+          boxShadow: 'var(--shadow-card)',
+          border: '1px solid var(--border)',
           textAlign: 'center',
         }}
       >
@@ -49,9 +49,9 @@ export default function Compare() {
             justifyContent: 'center',
             width: '56px',
             height: '56px',
-            borderRadius: '14px',
-            background: 'rgba(37, 99, 235, 0.07)',
-            border: '1px solid rgba(37, 99, 235, 0.15)',
+            borderRadius: 'var(--radius-sm)',
+            background: 'var(--chip-bg)',
+            border: '1px solid var(--border)',
             marginBottom: '24px',
           }}
         >
@@ -60,7 +60,7 @@ export default function Compare() {
             height="26"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#2563eb"
+            stroke="var(--primary)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -73,17 +73,17 @@ export default function Compare() {
 
         <h1
           style={{
-            fontFamily: 'DM Sans, sans-serif',
+            fontFamily: 'var(--font-heading)',
             fontSize: '1.9rem',
-            fontWeight: 800,
-            color: '#0a1628',
+            fontWeight: 700,
+            color: 'var(--primary)',
             letterSpacing: '-0.02em',
             margin: '0',
             lineHeight: 1.15,
             textTransform: 'uppercase',
           }}
         >
-          Work in Progress
+          Cross-Examination Offline
         </h1>
       </div>
     </main>

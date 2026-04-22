@@ -9,35 +9,35 @@ import styles from './page.module.css';
 const STEPS = [
   {
     id: 'basics',
-    label: 'The Basics',
-    title: 'Core Specifications',
-    description: 'Set your ideal ranges for price and fundamental smartphone specs.',
+    label: 'Core Parameters',
+    title: 'Baseline Specifications',
+    description: 'Set your ideal parameters for financial allocation and fundamental hardware constraints.',
     features: ['price', 'battery', 'screen', 'storage', 'ram'],
     tip: null,
   },
   {
     id: 'engine',
-    label: 'The Engine',
-    title: 'Performance Hardware',
-    description: 'Configure processor speed, camera resolution, fast-charging, and connectivity.',
+    label: 'Hardware Telemetry',
+    title: 'Processing Power',
+    description: 'Configure logic processors, optical sensors, energy transfer rates, and network frequencies.',
     features: ['processor', 'camera', 'charging', 'network'],
     tip: null,
   },
   {
     id: 'experience',
-    label: 'The Experience',
-    title: 'User Experience',
-    description: 'Rate how much you value software, sound quality, build quality, and design aesthetics.',
+    label: 'UX Metrics',
+    title: 'User Experience Calibration',
+    description: 'Rate the required fidelity of software environments, acoustic output, and structural aesthetics.',
     features: ['performance', 'quality', 'sound', 'design', 'software', 'build'],
     tip: null,
   },
   {
     id: 'dealbreaker',
-    label: 'Dealbreaker',
-    title: 'Your #1 Priority',
-    description: 'Pick the single attribute that matters most. Our engine applies a 5× weight multiplier — making mismatches here far more costly.',
+    label: 'Critical Override',
+    title: 'Your #1 Constraint',
+    description: 'Identify the single metric that cannot be compromised. The heuristic engine applies a 5× constraint multiplier to this value.',
     features: null,
-    tip: 'The <strong>Dealbreaker</strong> attribute receives a <strong style="color:#2563eb">5× weight multiplier</strong> in the Weighted Euclidean Distance formula, maximising its influence on your final results.',
+    tip: 'The <strong>Critical Override</strong> parameter receives a <strong style="color:var(--primary)">5× constraint multiplier</strong> in the validation algorithm, maximizing its influence on final artifact selection.',
   },
 ];
 
@@ -106,14 +106,14 @@ function ResultCard({ item, type }) {
   const pctTextRef = useRef(null);
 
   const COLORS = {
-    perfect: '#2563eb',
-    budget:  '#059669',
-    premium: '#7c3aed',
+    perfect: 'var(--primary)',
+    budget:  'var(--neutral)',
+    premium: 'var(--tertiary)',
   };
   const LABELS = {
-    perfect: 'Perfect Match',
-    budget:  'Budget Pick',
-    premium: 'Premium Upgrade',
+    perfect: 'Primary Artifact',
+    budget:  'Secondary Artifact',
+    premium: 'Tertiary Artifact',
   };
   const DELAYS = { perfect: 100, budget: 250, premium: 400 };
 
@@ -327,7 +327,7 @@ export default function PrecisionPick() {
                   onClick={handleFind}
                   disabled={!dealbreaker}
                 >
-                  Find My Phone
+                  Validate Artifacts
                 </button>
               ) : (
                 <button className={styles.btnPrimary} onClick={() => setStep(s => s + 1)}>
@@ -341,11 +341,11 @@ export default function PrecisionPick() {
           /* ── Results ──────────────────────────────────────────── */
           <div className={styles.results}>
             <div className={styles.resultsHeader}>
-              <h2 className={styles.resultsTitle}>Your Top Matches</h2>
+              <h2 className={styles.resultsTitle}>Validated Artifacts</h2>
               <p className={styles.resultsSub}>
-                Based on your preferences
+                Based on your initialized parameters
                 {dealbreaker ? (
-                  <> — Dealbreaker: <strong style={{ color: '#2563eb' }}>{FEATURE_CONFIG[dealbreaker].label}</strong></>
+                  <> — Critical Override: <strong style={{ color: 'var(--primary)' }}>{FEATURE_CONFIG[dealbreaker].label}</strong></>
                 ) : null}
               </p>
             </div>

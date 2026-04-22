@@ -38,28 +38,26 @@ export default function Home() {
         <div className={styles.heroLeft}>
 
           <h1 className={styles.heroHeading}>
-            Buying made<br />
-            <span className={styles.headingAccent}>visually effortless.</span>
+            Mission Control for<br />
+            <span className={styles.headingAccent}>Device Validation.</span>
           </h1>
 
           <p className={styles.heroSubtext}>
-            Skip the endless scrolling. Instantly discover the perfect smartphone
-            tailored to your exact needs, and compare your top choices side-by-side
-            with precision data.
+            Bypass consumer noise. Initialize a parameterized mission to discover validated hardware artifacts that match your exact operational requirements.
           </p>
 
           <div className={styles.heroActions}>
             <Link href="/precision-pick" className={styles.btnPrimary}>
-              Find My Phone
+              Initialize Mission
             </Link>
             <Link href="/compare" className={styles.btnSecondary}>
-              Compare Phones
+              Cross-Examine
             </Link>
           </div>
 
           {/* Trust chips */}
           <div className={styles.trustRow}>
-            {['15 Key Attributes', 'Weighted Algorithm', '10 Flagship Phones'].map(t => (
+            {['15 Telemetry Vectors', 'Heuristic Engine', 'Curated Artifacts'].map(t => (
               <span key={t} className={styles.trustChip}>{t}</span>
             ))}
           </div>
@@ -73,15 +71,14 @@ export default function Home() {
             <div className={styles.mockHeader}>
               <div className={styles.mockAvatar}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                  <line x1="12" y1="18" x2="12.01" y2="18"/>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
               <div>
-                <div className={styles.mockTitle}>Top Match Found</div>
-                <div className={styles.mockSub}>Precision Pick · 2 sec ago</div>
+                <div className={styles.mockTitle}>Validated Artifact</div>
+                <div className={styles.mockSub}>System Output · 2 sec ago</div>
               </div>
-              <div className={styles.mockBadge}>New</div>
+              <div className={styles.mockBadge}>Verified</div>
             </div>
 
             {/* Phone result preview */}
@@ -102,10 +99,10 @@ export default function Home() {
             {/* Spec chips */}
             <div className={styles.mockSpecRow}>
               {[
-                { label: 'Camera', val: '200 MP' },
-                { label: 'Battery', val: '5000 mAh' },
-                { label: 'Charging', val: '45 W' },
-                { label: 'Storage', val: '512 GB' },
+                { label: 'Optics', val: '200 MP' },
+                { label: 'Capacity', val: '5000 mAh' },
+                { label: 'Input', val: '45 W' },
+                { label: 'Memory', val: '512 GB' },
               ].map(s => (
                 <div key={s.val} className={styles.mockSpec}>
                   <span className={styles.mockSpecLabel}>{s.label}</span>
@@ -117,14 +114,14 @@ export default function Home() {
             {/* Growth stat */}
             <div className={styles.statBubble}>
               <span className={styles.statValue}>+127%</span>
-              <span className={styles.statLabel}>Match Accuracy</span>
+              <span className={styles.statLabel}>Heuristic Confidence</span>
             </div>
 
           </div>
 
           {/* Floating feature pills */}
-          <div className={`${styles.floatPill} ${styles.pill1}`}>Perfect Match</div>
-          <div className={`${styles.floatPill} ${styles.pill2}`}>Budget Pick found</div>
+          <div className={`${styles.floatPill} ${styles.pill1}`}>Artifact Acquired</div>
+          <div className={`${styles.floatPill} ${styles.pill2}`}>Parameter Matched</div>
         </div>
 
       </section>
