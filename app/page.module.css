@@ -21,7 +21,7 @@
 }
 
 .heroHeading {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(2.6rem, 5.5vw, 4rem);
   font-weight: 800;
   line-height: 1.1;
@@ -61,14 +61,14 @@
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  box-shadow: 0 4px 24px rgba(37, 99, 235, 0.38);
+  box-shadow: 0 4px 24px rgba(0, 97, 255, 0.38);
   transition: var(--transition);
   letter-spacing: 0.01em;
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 36px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 8px 36px rgba(0, 97, 255, 0.5);
 }
 
 .btnSecondary {
@@ -82,14 +82,14 @@
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
-  border: 1.5px solid rgba(37, 99, 235, 0.25);
-  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
+  border: 1.5px solid rgba(0, 97, 255, 0.25);
+  box-shadow: 0 2px 12px rgba(0, 97, 255, 0.08);
   transition: var(--transition);
 }
 
 .btnSecondary:hover {
   border-color: var(--primary);
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 97, 255, 0.15);
   transform: translateY(-1px);
 }
 
@@ -105,7 +105,7 @@
   font-weight: 600;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(0, 97, 255, 0.12);
   border-radius: 50px;
   padding: 5px 14px;
 }
@@ -120,15 +120,15 @@
 }
 
 .mockCard {
-  background: white;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 24px;
   padding: 28px;
   width: 100%;
   max-width: 400px;
-  box-shadow:
-    0 16px 56px rgba(37, 99, 235, 0.12),
-    0 2px 8px rgba(37, 99, 235, 0.06),
-    0 0 0 1px rgba(37, 99, 235, 0.06);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   position: relative;
   animation: floatCard 6s ease-in-out infinite;
 }
@@ -173,13 +173,13 @@
 
 .mockBadge {
   margin-left: auto;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(0, 97, 255, 0.1);
   color: var(--primary);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 50px;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(0, 97, 255, 0.2);
 }
 
 .mockPhone {
@@ -216,7 +216,7 @@
 
 .mockMatch {
   margin-left: auto;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 800;
   color: var(--primary);
@@ -263,7 +263,7 @@
 }
 
 .statValue {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.3rem;
   font-weight: 800;
   color: white;
@@ -284,7 +284,7 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-primary);
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 97, 255, 0.1);
   border: 1px solid var(--border);
   white-space: nowrap;
 }
@@ -322,8 +322,10 @@
 }
 
 .featureCard {
-  background: white;
-  border: 1px solid var(--border);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-lg);
   padding: 28px 24px;
   box-shadow: var(--shadow-card);
@@ -333,19 +335,19 @@
 .featureCard:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(37, 99, 235, 0.25);
+  border-color: rgba(0, 97, 255, 0.25);
 }
 
 .featureIconLabel {
   display: inline-block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--primary);
-  background: rgba(37, 99, 235, 0.08);
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  background: rgba(0, 97, 255, 0.08);
+  border: 1px solid rgba(0, 97, 255, 0.15);
   border-radius: 6px;
   padding: 3px 9px;
   margin-bottom: 14px;
@@ -375,12 +377,12 @@
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(0, 97, 255, 0.14);
   border-radius: 20px;
   padding: 48px;
   box-shadow:
-    0 8px 40px rgba(37, 99, 235, 0.08),
-    0 0 0 1px rgba(37, 99, 235, 0.05);
+    0 8px 40px rgba(0, 97, 255, 0.08),
+    0 0 0 1px rgba(0, 97, 255, 0.05);
   text-align: center;
 }
 
@@ -388,8 +390,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(0, 97, 255, 0.06);
+  border: 1px solid rgba(0, 97, 255, 0.18);
   border-radius: 50px;
   padding: 5px 14px;
   margin-bottom: 20px;
@@ -418,7 +420,7 @@
 }
 
 .upcomingSectionTitle {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   font-weight: 800;
   color: var(--primary);
@@ -438,14 +440,14 @@
 .upcomingCard {
   position: relative;
   background: white;
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(0, 97, 255, 0.18);
   border-radius: 16px;
   padding: 32px 36px;
   max-width: 520px;
   margin: 0 auto;
   box-shadow:
-    0 8px 32px rgba(37, 99, 235, 0.1),
-    0 0 0 1px rgba(37, 99, 235, 0.06);
+    0 8px 32px rgba(0, 97, 255, 0.1),
+    0 0 0 1px rgba(0, 97, 255, 0.06);
   transition: opacity 0.5s ease, transform 0.5s ease;
   overflow: hidden;
 }
@@ -470,14 +472,14 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--primary);
-  background: rgba(37, 99, 235, 0.07);
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(0, 97, 255, 0.07);
+  border: 1px solid rgba(0, 97, 255, 0.18);
   border-radius: 50px;
   padding: 3px 12px;
 }
 
 .upcomingPhoneName {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--primary);
@@ -488,7 +490,7 @@
 
 @keyframes glowPulse {
   0%, 100% { text-shadow: 0 0 0 transparent; }
-  50% { text-shadow: 0 0 18px rgba(37, 99, 235, 0.25); }
+  50% { text-shadow: 0 0 18px rgba(0, 97, 255, 0.25); }
 }
 
 .upcomingPhoneStatus {
@@ -511,7 +513,7 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 97, 255, 0.06) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -581,4 +583,5 @@
     font-size: 1.5rem;
   }
 }
+
 

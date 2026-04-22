@@ -42,16 +42,16 @@
   font-weight: 700;
   font-size: 14px;
   background: white;
-  color: #8ca4b8;
+  color: var(--text-muted);
   border: 2px solid #d1dae6;
   transition: all 0.25s ease;
 }
 
 .stepCircle.active {
-  background: #2563eb;
+  background: var(--primary);
   color: white;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 5px rgba(0, 97, 255, 0.15);
 }
 
 .stepCircle.done {
@@ -65,12 +65,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #8ca4b8;
+  color: var(--text-muted);
   white-space: nowrap;
   transition: color 0.25s;
 }
 
-.stepLabel.active { color: #2563eb; }
+.stepLabel.active { color: var(--primary); }
 .stepLabel.done   { color: #059669; }
 
 .connector {
@@ -89,11 +89,13 @@
 
 /* ─── Wizard Card ────────────────────────────────── */
 .card {
-  background: white;
-  border-radius: 24px;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-lg);
   padding: 44px;
-  box-shadow: 0 4px 40px rgba(37, 99, 235, 0.08), 0 0 0 1px rgba(37, 99, 235, 0.07);
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -112,20 +114,20 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #2563eb;
+  color: var(--primary);
   margin-bottom: 10px;
 }
 
 .cardTitle {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.85rem;
   font-weight: 700;
-  color: #0a1628;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .cardDesc {
-  color: #4a6080;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
@@ -134,13 +136,13 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(37, 99, 235, 0.04);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: rgba(0, 97, 255, 0.04);
+  border: 1px solid rgba(0, 97, 255, 0.12);
   border-radius: 12px;
   padding: 14px 18px;
   margin-bottom: 28px;
   font-size: 0.88rem;
-  color: #4a6080;
+  color: var(--text-secondary);
   line-height: 1.55;
 }
 
@@ -170,14 +172,14 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #4a6080;
+  color: var(--text-secondary);
 }
 
 .sliderValue {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--primary);
   min-width: 80px;
   text-align: right;
 }
@@ -193,7 +195,7 @@
   position: absolute;
   left: 0; top: 0; bottom: 0;
   border-radius: 99px;
-  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+  background: linear-gradient(90deg, var(--primary), #3b82f6);
   pointer-events: none;
   transition: width 0.05s;
 }
@@ -205,14 +207,14 @@
   width: 18px; height: 18px;
   border-radius: 50%;
   background: white;
-  border: 2px solid #2563eb;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+  border: 2px solid var(--primary);
+  box-shadow: 0 2px 10px rgba(0, 97, 255, 0.3);
   pointer-events: none;
   transition: box-shadow 0.2s;
 }
 
 .trackWrapper:hover .trackThumb {
-  box-shadow: 0 2px 18px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 2px 18px rgba(0, 97, 255, 0.5);
 }
 
 .rangeInput {
@@ -246,14 +248,14 @@
 }
 
 .dbOption:hover {
-  border-color: rgba(37, 99, 235, 0.35);
-  background: rgba(37, 99, 235, 0.03);
+  border-color: rgba(0, 97, 255, 0.35);
+  background: rgba(0, 97, 255, 0.03);
 }
 
 .dbChecked {
-  border-color: #2563eb;
-  background: rgba(37, 99, 235, 0.06);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--primary);
+  background: rgba(0, 97, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(0, 97, 255, 0.1);
 }
 
 .dbRadio { display: none; }
@@ -263,11 +265,11 @@
 .dbText {
   font-size: 0.88rem;
   font-weight: 600;
-  color: #4a6080;
+  color: var(--text-secondary);
   flex: 1;
 }
 
-.dbChecked .dbText { color: #0a1628; }
+.dbChecked .dbText { color: var(--text-primary); }
 
 .dbCheck {
   width: 18px; height: 18px;
@@ -283,8 +285,8 @@
 }
 
 .dbCheckActive {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--primary);
+  border-color: var(--primary);
   color: white;
 }
 
@@ -300,8 +302,8 @@
 .btnGhost {
   background: transparent;
   border: none;
-  color: #8ca4b8;
-  font-family: 'DM Sans', sans-serif;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
   font-size: 0.9rem;
   font-weight: 600;
   padding: 13px 16px;
@@ -309,15 +311,15 @@
   transition: color 0.2s;
 }
 
-.btnGhost:hover { color: #4a6080; }
+.btnGhost:hover { color: var(--text-secondary); }
 
 .btnSecondary {
   padding: 13px 28px;
   border-radius: 12px;
   background: white;
-  color: #4a6080;
+  color: var(--text-secondary);
   border: 1.5px solid #d1dae6;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -325,52 +327,52 @@
 }
 
 .btnSecondary:hover {
-  border-color: rgba(37, 99, 235, 0.35);
-  color: #2563eb;
+  border-color: rgba(0, 97, 255, 0.35);
+  color: var(--primary);
 }
 
 .btnPrimary {
   padding: 13px 32px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  background: linear-gradient(135deg, var(--primary), var(--primary));
   color: white;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 97, 255, 0.35);
   transition: all 0.25s;
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 8px 28px rgba(0, 97, 255, 0.5);
 }
 
 .btnCta {
   padding: 16px 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  background: linear-gradient(135deg, var(--primary), var(--primary));
   color: white;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 4px 24px rgba(0, 97, 255, 0.4);
   letter-spacing: 0.02em;
   transition: all 0.25s;
 }
 
 .btnCta:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 36px rgba(37, 99, 235, 0.55);
+  box-shadow: 0 10px 36px rgba(0, 97, 255, 0.55);
 }
 
 .btnCta:disabled {
   background: #d1dae6;
-  color: #8ca4b8;
+  color: var(--text-muted);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -386,15 +388,15 @@
 }
 
 .resultsTitle {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 2.2rem;
   font-weight: 800;
-  color: #0a1628;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .resultsSub {
-  color: #4a6080;
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 
@@ -412,27 +414,29 @@
 
 /* ─── Result Card ────────────────────────────────── */
 .resultCard {
-  background: white;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-radius: 22px;
   padding: 28px 22px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  border: 1.5px solid rgba(37, 99, 235, 0.1);
-  box-shadow: 0 4px 28px rgba(37, 99, 235, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-card);
   transition: transform 0.25s, box-shadow 0.25s;
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .resultCard:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 44px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 14px 44px rgba(0, 97, 255, 0.14);
 }
 
 .resultFeatured {
-  border-color: rgba(37, 99, 235, 0.28);
-  box-shadow: 0 6px 36px rgba(37, 99, 235, 0.12);
+  border-color: rgba(0, 97, 255, 0.28);
+  box-shadow: 0 6px 36px rgba(0, 97, 255, 0.12);
 }
 
 .resultBadge {
@@ -461,10 +465,10 @@
 }
 
 .circleValue {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.5rem;
   font-weight: 800;
-  color: #0a1628;
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -473,7 +477,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #8ca4b8;
+  color: var(--text-muted);
 }
 
 .resultInfo {
@@ -485,20 +489,20 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #8ca4b8;
+  color: var(--text-muted);
 }
 
 .resultName {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
-  color: #0a1628;
+  color: var(--text-primary);
   line-height: 1.3;
   margin-top: 4px;
 }
 
 .resultPrice {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.4rem;
   font-weight: 800;
   color: #d97706;
@@ -513,7 +517,7 @@
 
 .specChip {
   background: #f0f4ff;
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(0, 97, 255, 0.1);
   border-radius: 9px;
   padding: 8px 10px;
   display: flex;
@@ -526,7 +530,7 @@
 .specVal {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #0a1628;
+  color: var(--text-primary);
 }
 
 .specKey {
@@ -534,7 +538,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #8ca4b8;
+  color: var(--text-muted);
 }
 
 /* ─── Responsive ─────────────────────────────────── */
@@ -545,4 +549,5 @@
   .btnRow { flex-direction: column-reverse; }
   .btnPrimary, .btnSecondary, .btnCta { width: 100%; text-align: center; justify-content: center; }
 }
+
 

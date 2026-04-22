@@ -33,12 +33,14 @@ export default function Compare() {
       <div
         style={{
           background: 'var(--card-bg)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           borderRadius: 'var(--radius-lg)',
           padding: '56px 48px',
           maxWidth: '560px',
           width: '100%',
           boxShadow: 'var(--shadow-card)',
-          border: '1px solid var(--border)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
           textAlign: 'center',
         }}
       >
