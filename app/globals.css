@@ -3,11 +3,13 @@
 /* ─── Design Tokens ─────────────────────────────── */
 :root {
   /* UI Folder Palette */
-  --bg-primary:    #F9F7F2;
+  --bg-primary:    #FFFFFF; /* Requested white background */
   --bg-secondary:  #F5F7FA;
+  --bg-beige:      #F5F4F0; /* For precision pick wizard */
   
-  --primary:       #0061FF;
-  --secondary:     #9A8470;
+  --primary:       #5C82A6; /* Main blue for buttons/accents from img 5 */
+  --primary-hover: #4A6B8C;
+  --secondary:     #9A8470; /* Taupe for precision pick */
   --tertiary:      #6D8EBF;
   --neutral:       #4A5568;
 
@@ -16,12 +18,13 @@
   --text-muted:    #A0AEC0;
 
   --card-bg:       rgba(255, 255, 255, 0.7);
+  --card-solid:    #FFFFFF;
   --border:        #E2E8F0;
   --border-hover:  #CBD5E0;
   --chip-bg:       #EDF2F7; 
 
   --shadow-card:   0 10px 40px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.4);
-  --shadow-hover:  0 14px 48px rgba(0, 97, 255, 0.1);
+  --shadow-hover:  0 14px 48px rgba(92, 130, 166, 0.1);
 
   --radius-sm:  12px;
   --radius-md:  16px;
@@ -81,8 +84,8 @@ button {
 /* ─── Scrollbar ──────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0, 97, 255, 0.2); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 97, 255, 0.4); }
+::-webkit-scrollbar-thumb { background: rgba(92, 130, 166, 0.2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(92, 130, 166, 0.4); }
 
 /* ─── Utilities ──────────────────────────────────── */
 .container {

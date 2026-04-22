@@ -18,17 +18,35 @@ import Script from 'next/script';
 
 export default function Chatbot() {
   return (
-    <div style={{ width: '100%', height: 'calc(100vh - 64px)' }}>
-      <Script 
-        type="module" 
-        src="https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js" 
-        strategy="lazyOnload"
-      />
-      <zapier-interfaces-chatbot-embed 
-        is-popup="false" 
-        chatbot-id="cmngc0d6i002w3ncsli612e08"
-        style={{ width: '100%', height: '100%' }}
-      />
+    <div style={{ 
+      width: '100%', 
+      minHeight: 'calc(100vh - 64px)', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      padding: '40px 24px'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '1000px',
+        height: '75vh',
+        background: 'white',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-card)',
+        border: '1px solid var(--border)',
+        overflow: 'hidden'
+      }}>
+        <Script 
+          type="module" 
+          src="https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js" 
+          strategy="lazyOnload"
+        />
+        <zapier-interfaces-chatbot-embed 
+          is-popup="false" 
+          chatbot-id="cmngc0d6i002w3ncsli612e08"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
     </div>
   );
 }
