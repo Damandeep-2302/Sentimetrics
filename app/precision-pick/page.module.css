@@ -7,8 +7,66 @@
 .container {
   max-width: 880px;
   margin: 0 auto;
-  padding-top: 48px;
+  padding-top: 24px;
 }
+
+/* ─── Data Banner ────────────────────────────────── */
+.dataBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 32px;
+  transition: all 0.4s ease;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dataBanner.loading {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+.dataBanner.loading .statusDot {
+  background: #94a3b8;
+  animation: pulse 1.5s infinite;
+}
+
+.dataBanner.live {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #d1fae5;
+}
+.dataBanner.live .statusDot {
+  background: #10b981;
+}
+
+.dataBanner.fallback {
+  background: #fff7ed;
+  color: #d97706;
+  border: 1px solid #ffedd5;
+}
+.dataBanner.fallback .statusDot {
+  background: #f59e0b;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
 
 /* ─── Progress Nav ───────────────────────────────── */
 .progressNav {

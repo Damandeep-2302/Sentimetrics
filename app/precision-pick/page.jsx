@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getRecommendations, selectTop3 } from '@/src/utils/engine.js';
-import { FEATURE_CONFIG, ALL_FEATURES } from '@/src/api/mobileData.js';
+import { FEATURE_CONFIG, ALL_FEATURES, phones as fallbackPhones } from '@/src/api/mobileData.js';
 import styles from './page.module.css';
 
 // ─── Wizard Step Definitions ─────────────────────────────────────────────────
@@ -56,7 +56,7 @@ function formatValue(feature, value) {
   const { unit } = FEATURE_CONFIG[feature];
   if (unit === '₹')    return `₹${value.toLocaleString('en-IN')}`;
   if (unit === 'mAh')  return `${value.toLocaleString('en-IN')} mAh`;
-  if (unit === 'in')   return `${parseFloat(value).toFixed(1)}"`;
+  if (unit === '"')   return `${parseFloat(value).toFixed(1)}"`;
   if (unit === 'GB')   return `${value} GB`;
   if (unit === 'GHz')  return `${parseFloat(value).toFixed(1)} GHz`;
   if (unit === 'MP')   return `${value} MP`;
@@ -89,7 +89,7 @@ function Slider({ feature, value, onChange }) {
           aria-label={cfg.label}
           onChange={e => {
             const raw = parseFloat(e.target.value);
-            const val = cfg.unit === 'in'
+            const val = cfg.unit === '"'
               ? Math.round(raw / cfg.step) * cfg.step
               : parseInt(raw, 10);
             onChange(feature, val);
@@ -212,13 +212,39 @@ export default function PrecisionPick() {
   const [prefs,       setPrefs]       = useState(getDefaultPrefs);
   const [dealbreaker, setDealbreaker] = useState(null);
   const [results,     setResults]     = useState(null);
+  
+  // Live data state
+  const [dataset, setDataset] = useState(fallbackPhones);
+  const [dataStatus, setDataStatus] = useState('loading'); // loading, live, fallback
+
+  // Fetch live data on mount
+  useEffect(() => {
+    async function fetchLivePhones() {
+      try {
+        const res = await fetch('http://localhost:3001/api/released-phones');
+        if (!res.ok) throw new Error('API failed');
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setDataset(data);
+          setDataStatus('live');
+        } else {
+          throw new Error('Empty data');
+        }
+      } catch (err) {
+        console.error('Failed to fetch live phones, using fallback:', err);
+        setDataset(fallbackPhones);
+        setDataStatus('fallback');
+      }
+    }
+    fetchLivePhones();
+  }, []);
 
   function handlePrefChange(feature, value) {
     setPrefs(prev => ({ ...prev, [feature]: value }));
   }
 
   function handleFind() {
-    const recs = getRecommendations(prefs, dealbreaker);
+    const recs = getRecommendations(dataset, prefs, dealbreaker);
     setResults(selectTop3(recs));
     setStep(4);
   }
@@ -237,6 +263,16 @@ export default function PrecisionPick() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
+
+        {/* Dataset Status Banner */}
+        <div className={`${styles.dataBanner} ${styles[dataStatus]}`}>
+          <div className={styles.statusDot} />
+          <span>
+            {dataStatus === 'loading' && 'Connecting to smartphone database...'}
+            {dataStatus === 'live' && `Live dataset active · ${dataset.length} phones`}
+            {dataStatus === 'fallback' && `Offline mode · using cached dataset (${dataset.length} phones)`}
+          </span>
+        </div>
 
         {/* ── Progress Nav ─────────────────────────────────────── */}
         {step < 4 && (

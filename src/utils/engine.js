@@ -10,47 +10,23 @@
  *  6. Sort ascending by distance and return top N results
  */
 
-import { phones, FEATURE_CONFIG, ALL_FEATURES } from '../api/mobileData.js';
+import { FEATURE_CONFIG, ALL_FEATURES } from '../api/mobileData.js';
 
 // ─── Step 1: Min-Max Normalization ────────────────────────────────────────────
-/**
- * Normalizes a raw value to [0, 1] using the global feature range from FEATURE_CONFIG.
- * Formula: normalized = (value - min) / (max - min)
- *
- * This ensures a 5000mAh battery (large number) doesn't dominate a 9/10 design
- * score (small number) simply because of different unit scales.
- */
 function normalize(feature, value) {
   const { min, max } = FEATURE_CONFIG[feature];
   if (max === min) return 0;
-  return (value - min) / (max - min);
+  // Clamp value to range to handle data outside config bounds
+  const clamped = Math.max(min, Math.min(max, value));
+  return (clamped - min) / (max - min);
 }
 
 // ─── Step 2: Build Normalized Vectors ─────────────────────────────────────────
-/**
- * Converts a phone or user-preference object into a normalized 14-dimensional vector.
- * Each element corresponds to one feature in ALL_FEATURES.
- */
 function buildVector(obj) {
-  return ALL_FEATURES.map(feature => normalize(feature, obj[feature]));
+  return ALL_FEATURES.map(feature => normalize(feature, obj[feature] || 0));
 }
 
 // ─── Step 3 & 4: Weighted Euclidean Distance ──────────────────────────────────
-/**
- * Computes the Euclidean distance between two normalized vectors with feature weighting.
- *
- * Standard Euclidean Distance:  d = sqrt( Σ (a_i - b_i)² )
- * Weighted Euclidean Distance:  d = sqrt( Σ w_i * (a_i - b_i)² )
- *
- * For the "Dealbreaker" feature, we apply a weight multiplier of 5×
- * so that mismatches on that feature contribute far more to the distance.
- * All other features get a default weight of 1.
- *
- * @param {number[]} vecA - Normalized user preference vector
- * @param {number[]} vecB - Normalized phone feature vector
- * @param {string|null} dealbreaker - Feature key that should be heavily weighted
- * @returns {number} Weighted Euclidean distance (lower = better match)
- */
 function weightedEuclidean(vecA, vecB, dealbreaker = null) {
   const DEALBREAKER_WEIGHT = 5.0;
   const DEFAULT_WEIGHT = 1.0;
@@ -65,34 +41,26 @@ function weightedEuclidean(vecA, vecB, dealbreaker = null) {
 }
 
 // ─── Step 5: Distance → Match Percentage ──────────────────────────────────────
-/**
- * Converts a distance score to an intuitive match percentage.
- * The max possible weighted Euclidean distance (all features at opposite extremes
- * with one dealbreaker) is sqrt(5 + 13) = sqrt(18) ≈ 4.24.
- * We normalize against that ceiling, then invert so 0 distance = 100% match.
- *
- * @param {number} distance
- * @param {number} maxDistance - The maximum observed distance in the current result set
- * @returns {number} Match percentage (0–100)
- */
 function distanceToPercent(distance, maxDistance) {
   if (maxDistance === 0) return 100;
-  return Math.round((1 - distance / maxDistance) * 100);
+  const pct = Math.round((1 - distance / maxDistance) * 100);
+  return Math.max(0, pct);
 }
 
 // ─── Main Recommendation Function ─────────────────────────────────────────────
 /**
  * Runs the full content-based filtering pipeline.
- *
- * @param {Object} userPrefs - User preference object with all 14 feature keys
- * @param {string|null} dealbreaker - The feature the user considers most important
- * @returns {Object[]} Array of result objects sorted by match (best first), each containing:
- *   { phone, distance, matchPercent }
+ * 
+ * @param {Object[]} phoneList - The dataset to search against
+ * @param {Object} userPrefs - User preference object
+ * @param {string|null} dealbreaker - Priority feature
  */
-export function getRecommendations(userPrefs, dealbreaker = null) {
+export function getRecommendations(phoneList, userPrefs, dealbreaker = null) {
+  if (!phoneList || phoneList.length === 0) return [];
+  
   const userVector = buildVector(userPrefs);
 
-  const scored = phones.map(phone => {
+  const scored = phoneList.map(phone => {
     const phoneVector = buildVector(phone);
     const distance = weightedEuclidean(userVector, phoneVector, dealbreaker);
     return { phone, distance };
@@ -114,24 +82,18 @@ export function getRecommendations(userPrefs, dealbreaker = null) {
 
 /**
  * Selects the 3 UI "slots" from the sorted recommendations:
- *  - "Perfect Match":    The #1 closest match overall
- *  - "Budget Pick":      Best match that is strictly cheaper than the Perfect Match
- *  - "Premium Upgrade":  Best match that is strictly more expensive than the Perfect Match
- *
- * Falls back to 2nd and 3rd best if no price-bracket match exists.
- *
- * @param {Object[]} recommendations - Sorted results from getRecommendations()
- * @returns {{ perfect, budget, premium }}
  */
 export function selectTop3(recommendations) {
+  if (!recommendations || recommendations.length === 0) return null;
+  
   const perfect = recommendations[0];
   const perfectPrice = perfect.phone.price;
 
   const budgetCandidates  = recommendations.slice(1).filter(r => r.phone.price < perfectPrice);
   const premiumCandidates = recommendations.slice(1).filter(r => r.phone.price > perfectPrice);
 
-  const budget  = budgetCandidates.length  > 0 ? budgetCandidates[0]  : recommendations[1];
-  const premium = premiumCandidates.length > 0 ? premiumCandidates[0] : recommendations[2] || recommendations[1];
+  const budget  = budgetCandidates.length  > 0 ? budgetCandidates[0]  : (recommendations[1] || perfect);
+  const premium = premiumCandidates.length > 0 ? premiumCandidates[0] : (recommendations[2] || recommendations[1] || perfect);
 
   return { perfect, budget, premium };
 }

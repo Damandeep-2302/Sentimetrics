@@ -1,90 +1,267 @@
 'use client';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Compare Phones — Work in Progress
-//
-// This page is reserved for a collaborating developer to implement the
-// side-by-side smartphone specification comparison feature.
-//
-// Implementation guidance:
-//  1. Import `phones` and `FEATURE_CONFIG` from '@/src/api/mobileData.js'
-//  2. Render a multi-select dropdown or search field allowing the user to
-//     choose between 2 and 3 devices for comparison
-//  3. Build a comparison table where each row represents one of the 15
-//     attributes and each column represents a selected device
-//  4. Highlight the winning value in each row (highest or lowest depending
-//     on the attribute — e.g. lower price is better, higher battery is better)
-//  5. Use the existing CSS custom properties in app/globals.css for consistent
-//     visual language across the platform
-//  6. Consider adding a "Clear Selection" control to reset the comparison state
-// ─────────────────────────────────────────────────────────────────────────────
+import { useState, useEffect, useMemo } from 'react';
+import { FEATURE_CONFIG, ALL_FEATURES, phones as fallbackPhones } from '@/src/api/mobileData.js';
+
+// ─── Comparison Logic Helpers ────────────────────────────────────────────────
+function getBestValue(feature, phones) {
+  if (!phones || phones.length === 0) return null;
+  const values = phones.map(p => p[feature]);
+  
+  // Price: lower is better
+  if (feature === 'price') return Math.min(...values);
+  
+  // Higher is better for everything else
+  return Math.max(...values);
+}
+
+function formatValue(feature, value) {
+  if (value === undefined || value === null) return '-';
+  const { unit } = FEATURE_CONFIG[feature];
+  if (unit === '₹')    return `₹${value.toLocaleString('en-IN')}`;
+  if (unit === 'mAh')  return `${value.toLocaleString('en-IN')} mAh`;
+  if (unit === '"')    return `${value}"`;
+  if (unit === 'GB')   return `${value} GB`;
+  if (unit === 'GHz')  return `${value} GHz`;
+  if (unit === 'MP')   return `${value} MP`;
+  if (unit === 'W')    return `${value} W`;
+  if (unit === '/10')  return `${value}/10`;
+  return String(value);
+}
 
 export default function Compare() {
-  return (
-    <main
-      style={{
-        minHeight: 'calc(100vh - 64px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '60px 24px',
-      }}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '56px 48px',
-          maxWidth: '560px',
-          width: '100%',
-          boxShadow: '0 8px 40px rgba(37, 99, 235, 0.09), 0 0 0 1px rgba(37, 99, 235, 0.07)',
-          border: '1px solid rgba(37, 99, 235, 0.1)',
-          textAlign: 'center',
-        }}
-      >
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '56px',
-            height: '56px',
-            borderRadius: '14px',
-            background: 'rgba(37, 99, 235, 0.07)',
-            border: '1px solid rgba(37, 99, 235, 0.15)',
-            marginBottom: '24px',
-          }}
-        >
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#2563eb"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="18" y1="20" x2="18" y2="10" />
-            <line x1="12" y1="20" x2="12" y2="4" />
-            <line x1="6"  y1="20" x2="6"  y2="14" />
-          </svg>
-        </div>
+  const [dataset, setDataset] = useState(fallbackPhones);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-        <h1
-          style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: '1.9rem',
-            fontWeight: 800,
-            color: '#0a1628',
-            letterSpacing: '-0.02em',
-            margin: '0',
-            lineHeight: 1.15,
-            textTransform: 'uppercase',
-          }}
-        >
-          Work in Progress
-        </h1>
+  // Fetch data
+  useEffect(() => {
+    async function fetchLivePhones() {
+      try {
+        const res = await fetch('http://localhost:3001/api/released-phones');
+        if (!res.ok) throw new Error('API failed');
+        const data = await res.json();
+        if (data && data.length > 0) setDataset(data);
+      } catch (err) {
+        console.error('Compare page fetch failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchLivePhones();
+  }, []);
+
+  // Filter phones by search
+  const filteredPhones = useMemo(() => {
+    if (!searchQuery.trim()) return dataset.slice(0, 10); // Show top 10 initially
+    const q = searchQuery.toLowerCase();
+    return dataset.filter(p => 
+      p.name.toLowerCase().includes(q) || 
+      p.brand.toLowerCase().includes(q)
+    ).slice(0, 20); // Limit results for performance
+  }, [dataset, searchQuery]);
+
+  const selectedPhones = useMemo(() => 
+    selectedIds.map(id => dataset.find(p => p.id === id)).filter(Boolean),
+    [dataset, selectedIds]
+  );
+
+  const togglePhone = (id) => {
+    setSelectedIds(prev => {
+      if (prev.includes(id)) return prev.filter(i => i !== id);
+      if (prev.length >= 3) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const removePhone = (id) => {
+    setSelectedIds(prev => prev.filter(i => i !== id));
+  };
+
+  return (
+    <main style={{ minHeight: '100vh', padding: '40px 20px', background: '#f8fafc' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+        
+        <header style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h1 style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
+            Compare Devices
+          </h1>
+          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>
+            Select up to 3 smartphones to see a detailed side-by-side specification breakdown.
+          </p>
+        </header>
+
+        {/* Search & Selection Section */}
+        <section style={{ background: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 4px 25px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '24px', alignItems: 'start' }}>
+            
+            {/* Left: Search Area */}
+            <div style={{ position: 'relative' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <input 
+                  type="text"
+                  placeholder="Search phones (e.g. iPhone 14, Samsung S23)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '16px 20px',
+                    borderRadius: '12px',
+                    border: '2px solid #e2e8f0',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                    fontFamily: 'inherit'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                  onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                />
+              </div>
+
+              {searchQuery && (
+                <div style={{ 
+                  position: 'absolute', top: '70px', left: 0, right: 0, 
+                  background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)', zIndex: 10,
+                  maxHeight: '300px', overflowY: 'auto', padding: '8px'
+                }}>
+                  {filteredPhones.length > 0 ? filteredPhones.map(p => (
+                    <div 
+                      key={p.id}
+                      onClick={() => { togglePhone(p.id); setSearchQuery(''); }}
+                      style={{
+                        padding: '12px 16px', borderRadius: '8px', cursor: 'pointer',
+                        background: selectedIds.includes(p.id) ? '#eff6ff' : 'transparent',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = selectedIds.includes(p.id) ? '#eff6ff' : 'transparent'}
+                    >
+                      <span style={{ fontWeight: 600, color: '#1e293b' }}>{p.name}</span>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>₹{p.price.toLocaleString()}</span>
+                    </div>
+                  )) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>No phones found matching "{searchQuery}"</div>
+                  )}
+                </div>
+              )}
+
+              {/* Suggestions Chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontSize: '0.9rem', color: '#64748b', alignSelf: 'center', marginRight: '8px' }}>Popular:</span>
+                {dataset.slice(0, 5).map(p => (
+                  <button 
+                    key={p.id}
+                    onClick={() => togglePhone(p.id)}
+                    disabled={selectedIds.includes(p.id)}
+                    style={{
+                      padding: '6px 14px', borderRadius: '100px', border: '1px solid #e2e8f0',
+                      background: 'white', color: '#475569', fontSize: '0.85rem', fontWeight: 600,
+                      cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    + {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Selected Counter */}
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                Selected ({selectedIds.length}/3)
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                {selectedPhones.map(p => (
+                  <div key={p.id} style={{ 
+                    background: '#f1f5f9', padding: '8px 12px', borderRadius: '10px', 
+                    display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #e2e8f0'
+                  }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>{p.brand} {p.name.split(' ')[0]}</span>
+                    <button 
+                      onClick={() => removePhone(p.id)}
+                      style={{ border: 'none', background: '#cbd5e1', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}
+                    >✕</button>
+                  </div>
+                ))}
+                {selectedIds.length === 0 && (
+                  <div style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.9rem' }}>Choose phones to compare</div>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* Comparison Table */}
+        {selectedIds.length > 0 ? (
+          <div style={{ background: 'white', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', border: '1px solid #e2e8f0' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
+                  <th style={{ padding: '24px', width: '200px', background: '#f8fafc', color: '#64748b', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Attribute</th>
+                  {selectedPhones.map(p => (
+                    <th key={p.id} style={{ padding: '24px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', marginBottom: '4px' }}>{p.brand}</div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{p.name}</div>
+                    </th>
+                  ))}
+                  {/* Fill empty slots */}
+                  {Array.from({ length: 3 - selectedIds.length }).map((_, i) => (
+                    <th key={`empty-${i}`} style={{ padding: '24px', textAlign: 'center', color: '#cbd5e1' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f8fafc', border: '2px dashed #e2e8f0', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>+</div>
+                      <div style={{ fontSize: '0.9rem' }}>Add Device</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ALL_FEATURES.map((feature, idx) => {
+                  const cfg = FEATURE_CONFIG[feature];
+                  const bestValue = getBestValue(feature, selectedPhones);
+                  
+                  return (
+                    <tr key={feature} style={{ borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? 'transparent' : '#fcfdfe' }}>
+                      <td style={{ padding: '18px 24px', fontWeight: 600, color: '#475569', fontSize: '0.95rem' }}>{cfg.label}</td>
+                      {selectedPhones.map(p => {
+                        const isBest = p[feature] === bestValue && selectedPhones.length > 1;
+                        return (
+                          <td key={p.id} style={{ padding: '18px 24px', textAlign: 'center' }}>
+                            <div style={{ 
+                              display: 'inline-block', padding: '6px 12px', borderRadius: '8px',
+                              background: isBest ? '#ecfdf5' : 'transparent',
+                              border: isBest ? '1px solid #10b981' : 'none',
+                              color: isBest ? '#065f46' : '#1e293b',
+                              fontWeight: isBest ? 800 : 500,
+                              fontSize: '1rem'
+                            }}>
+                              {formatValue(feature, p[feature])}
+                              {isBest && <span style={{ marginLeft: '6px', fontSize: '0.7rem', verticalAlign: 'middle', background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>BEST</span>}
+                            </div>
+                          </td>
+                        );
+                      })}
+                      {/* Empty cells */}
+                      {Array.from({ length: 3 - selectedIds.length }).map((_, i) => (
+                        <td key={`empty-cell-${i}`} style={{ padding: '18px 24px' }}></td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '100px 40px', background: 'white', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '20px' }}>📊</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>Start your comparison</h3>
+            <p style={{ color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>
+              Use the search bar above to find and select smartphones. You can compare up to 3 devices side-by-side.
+            </p>
+          </div>
+        )}
+
       </div>
     </main>
   );
