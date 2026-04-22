@@ -12,6 +12,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const { scrapeUpcomingPhones } = require('./scraper');
+const releasedPhones = require('../src/api/phones.json');
+
 
 const PORT = 3001;
 const FRONTEND_ORIGIN = 'http://localhost:3000';
@@ -61,6 +63,15 @@ app.get('/api/health', (req, res) => {
 app.get('/api/phones', (req, res) => {
   res.json({ phones: upcomingPhones });
 });
+
+/**
+ * GET /api/released-phones
+ * Returns the full list of released phones from the shared dataset.
+ */
+app.get('/api/released-phones', (req, res) => {
+  res.json(releasedPhones);
+});
+
 
 // ---------------------------------------------------------------------------
 // Ping-pong rotation logic
