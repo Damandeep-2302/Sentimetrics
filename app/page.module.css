@@ -555,10 +555,29 @@
   }
 
   .upcomingInner {
-    padding: 32px 20px;
+    padding: 32px 16px;
+    border-radius: 16px;
   }
 
   .upcomingCard {
-    padding: 24px 20px;
+    padding: 24px 16px;
+  }
+
+  .upcomingPhoneName {
+    font-size: 1.2rem;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .upcomingPhoneStatus {
+    font-size: 0.85rem;
+  }
+
+  .upcomingPhonePrice {
+    font-size: 0.85rem;
+  }
+
+  .upcomingSectionTitle {
+    font-size: 1.5rem;
   }
 }

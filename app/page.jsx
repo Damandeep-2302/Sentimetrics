@@ -10,7 +10,8 @@ export default function Home() {
   const [phoneVisible,  setPhoneVisible]    = useState(true);
 
   useEffect(() => {
-    const socket = io('http://localhost:3001', {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+    const socket = io(backendUrl, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
     });
