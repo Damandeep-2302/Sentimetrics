@@ -1,1433 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PhoneMatch AI — Smart Mobile Recommendation System</title>
-  <meta name="description" content="AI-powered mobile phone recommendation engine using Content-Based Filtering. Find your perfect phone match in 4 steps." />
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <style>
-    /* ========================================
-       ROOT & DESIGN TOKENS
-    ======================================== */
-    :root {
-      --bg-deepest: #04060d;
-      --bg-dark:    #080e1c;
-      --bg-card:    rgba(12, 20, 40, 0.85);
-      --bg-glass:   rgba(20, 35, 70, 0.45);
-      --bg-input:   rgba(15, 25, 55, 0.7);
-
-      --accent-primary:  #4f8ef7;
-      --accent-glow:     #3b7ff5;
-      --accent-cyan:     #22d3ee;
-      --accent-violet:   #a78bfa;
-      --accent-gold:     #fbbf24;
-      --accent-green:    #34d399;
-      --accent-rose:     #fb7185;
-
-      --text-primary:   #e8f0fe;
-      --text-secondary: #8ca4cc;
-      --text-muted:     #4a6080;
-
-      --border-subtle:  rgba(79, 142, 247, 0.15);
-      --border-glow:    rgba(79, 142, 247, 0.4);
-
-      --radius-sm:  8px;
-      --radius-md:  14px;
-      --radius-lg:  20px;
-      --radius-xl:  28px;
-
-      --shadow-card: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle);
-      --shadow-glow: 0 0 40px rgba(79, 142, 247, 0.18);
-      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ========================================
-       RESET & BASE
-    ======================================== */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-deepest);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      line-height: 1.6;
-    }
-
-    /* ========================================
-       ANIMATED BACKGROUND
-    ======================================== */
-    .bg-orbs {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.25;
-      animation: orbFloat 12s ease-in-out infinite;
-    }
-
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, #2563eb, transparent 70%);
-      top: -200px; left: -150px;
-      animation-delay: 0s;
-    }
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, #7c3aed, transparent 70%);
-      top: 40%; right: -200px;
-      animation-delay: -4s;
-    }
-    .orb-3 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, #0891b2, transparent 70%);
-      bottom: -150px; left: 30%;
-      animation-delay: -8s;
-    }
-
-    @keyframes orbFloat {
-      0%, 100% { transform: translateY(0) scale(1); }
-      33%       { transform: translateY(-40px) scale(1.05); }
-      66%       { transform: translateY(20px) scale(0.97); }
-    }
-
-    /* ========================================
-       GRID OVERLAY
-    ======================================== */
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-image:
-        linear-gradient(rgba(79, 142, 247, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(79, 142, 247, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
-
-    /* ========================================
-       LAYOUT
-    ======================================== */
-    .app-wrapper {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px 80px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 860px;
-    }
-
-    /* ========================================
-       HEADER
-    ======================================== */
-    .header {
-      text-align: center;
-      padding: 48px 0 40px;
-    }
-
-    .header-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-glass);
-      border: 1px solid var(--border-subtle);
-      border-radius: 50px;
-      padding: 6px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent-cyan);
-      margin-bottom: 20px;
-    }
-
-    .header-badge .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent-cyan);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .header h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, #e8f0fe 0%, var(--accent-primary) 50%, var(--accent-cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header p {
-      font-size: 1.05rem;
-      color: var(--text-secondary);
-      max-width: 540px;
-      margin: 0 auto;
-    }
-
-    /* ========================================
-       PROGRESS STEPS
-    ======================================== */
-    .progress-nav {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 36px;
-      gap: 0;
-    }
-
-    .step-item {
-      display: flex;
-      align-items: center;
-    }
-
-    .step-circle {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 14px;
-      border: 2px solid var(--border-subtle);
-      background: var(--bg-card);
-      color: var(--text-muted);
-      transition: var(--transition);
-      cursor: default;
-      position: relative;
-      z-index: 1;
-    }
-
-    .step-circle.active {
-      border-color: var(--accent-primary);
-      background: rgba(79, 142, 247, 0.15);
-      color: var(--accent-primary);
-      box-shadow: 0 0 20px rgba(79, 142, 247, 0.35);
-    }
-
-    .step-circle.done {
-      border-color: var(--accent-green);
-      background: rgba(52, 211, 153, 0.15);
-      color: var(--accent-green);
-    }
-
-    .step-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-top: 6px;
-      white-space: nowrap;
-    }
-
-    .step-label.active { color: var(--accent-primary); }
-    .step-label.done { color: var(--accent-green); }
-
-    .step-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
-
-    .step-connector {
-      width: 60px;
-      height: 2px;
-      background: var(--border-subtle);
-      margin: 0 4px;
-      margin-bottom: 22px;
-      transition: var(--transition);
-    }
-
-    .step-connector.done {
-      background: var(--accent-green);
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
-    }
-
-    /* ========================================
-       GLASS CARD
-    ======================================== */
-    .glass-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-xl);
-      padding: 40px;
-      box-shadow: var(--shadow-card), var(--shadow-glow);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-header {
-      margin-bottom: 32px;
-    }
-
-    .card-header .step-tag {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--accent-cyan);
-      margin-bottom: 8px;
-    }
-
-    .card-header h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 6px;
-    }
-
-    .card-header p {
-      color: var(--text-secondary);
-      font-size: 0.93rem;
-    }
-
-    /* ========================================
-       SLIDER COMPONENT
-    ======================================== */
-    .sliders-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 28px 40px;
-    }
-
-    .slider-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .slider-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .slider-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-
-    .slider-value {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--accent-primary);
-      min-width: 70px;
-      text-align: right;
-    }
-
-    .slider-track-wrapper {
-      position: relative;
-      height: 6px;
-      background: var(--bg-input);
-      border-radius: 99px;
-      border: 1px solid var(--border-subtle);
-    }
-
-    .slider-fill {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--accent-glow), var(--accent-cyan));
-      box-shadow: 0 0 10px rgba(79, 142, 247, 0.5);
-      pointer-events: none;
-      transition: width 0.05s;
-    }
-
-    input[type="range"] {
-      position: absolute;
-      inset: -6px 0;
-      width: 100%;
-      height: 18px;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    .slider-thumb {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid var(--accent-primary);
-      box-shadow: 0 0 12px rgba(79, 142, 247, 0.6);
-      pointer-events: none;
-      transition: box-shadow 0.2s;
-    }
-
-    .slider-track-wrapper:hover .slider-thumb {
-      box-shadow: 0 0 20px rgba(79, 142, 247, 0.9);
-    }
-
-    /* ========================================
-       DEALBREAKER TOGGLE
-    ======================================== */
-    .dealbreaker-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    .db-option {
-      position: relative;
-    }
-
-    .db-option input[type="radio"] {
-      position: absolute;
-      opacity: 0;
-      width: 0; height: 0;
-    }
-
-    .db-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--border-subtle);
-      background: var(--bg-input);
-      cursor: pointer;
-      transition: var(--transition);
-      user-select: none;
-    }
-
-    .db-label:hover {
-      border-color: var(--border-glow);
-      background: var(--bg-glass);
-    }
-
-    .db-option input:checked + .db-label {
-      border-color: var(--accent-primary);
-      background: rgba(79, 142, 247, 0.12);
-      box-shadow: 0 0 20px rgba(79, 142, 247, 0.2), inset 0 0 0 1px rgba(79, 142, 247, 0.2);
-    }
-
-    .db-icon {
-      font-size: 18px;
-    }
-
-    .db-text {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .db-option input:checked + .db-label .db-text {
-      color: var(--text-primary);
-    }
-
-    .db-check {
-      margin-left: auto;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      border: 2px solid var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: transparent;
-      transition: var(--transition);
-    }
-
-    .db-option input:checked + .db-label .db-check {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: white;
-    }
-
-    /* ========================================
-       BUTTONS
-    ======================================== */
-    .btn-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 36px;
-      gap: 12px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 28px;
-      border-radius: var(--radius-md);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      border: none;
-      outline: none;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
-      color: white;
-      box-shadow: 0 4px 24px rgba(79, 142, 247, 0.4);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(79, 142, 247, 0.6);
-    }
-
-    .btn-primary:active { transform: translateY(0); }
-
-    .btn-secondary {
-      background: var(--bg-input);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--border-glow);
-      color: var(--text-primary);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-      padding: 13px 16px;
-    }
-
-    .btn-ghost:hover { color: var(--text-secondary); }
-
-    .btn-cta {
-      background: linear-gradient(135deg, #6d28d9, var(--accent-primary));
-      color: white;
-      padding: 16px 40px;
-      font-size: 1rem;
-      font-weight: 700;
-      border-radius: var(--radius-lg);
-      box-shadow: 0 4px 32px rgba(109, 40, 217, 0.45);
-      letter-spacing: 0.02em;
-    }
-
-    .btn-cta:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 40px rgba(109, 40, 217, 0.6);
-    }
-
-    /* ========================================
-       RESULTS VIEW
-    ======================================== */
-    .results-section {
-      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .results-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    .results-header h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #e8f0fe, var(--accent-primary), var(--accent-cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
-    }
-
-    .results-header p { color: var(--text-secondary); }
-
-    .results-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    @media (min-width: 700px) {
-      .results-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    .result-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      transition: var(--transition);
-      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
-    }
-
-    .result-card:nth-child(1) { animation-delay: 0.1s; }
-    .result-card:nth-child(2) { animation-delay: 0.2s; }
-    .result-card:nth-child(3) { animation-delay: 0.3s; }
-
-    .result-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--border-glow);
-      box-shadow: var(--shadow-card), 0 16px 48px rgba(0,0,0,0.4);
-    }
-
-    .result-card.featured {
-      border-color: rgba(79, 142, 247, 0.4);
-      background: linear-gradient(160deg, rgba(12,20,40,0.95), rgba(20,40,80,0.85));
-      box-shadow: var(--shadow-card), 0 0 40px rgba(79, 142, 247, 0.2);
-    }
-
-    .result-badge {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 50px;
-    }
-
-    .badge-perfect {
-      background: rgba(79, 142, 247, 0.15);
-      color: var(--accent-primary);
-      border: 1px solid rgba(79, 142, 247, 0.3);
-    }
-
-    .badge-budget {
-      background: rgba(52, 211, 153, 0.12);
-      color: var(--accent-green);
-      border: 1px solid rgba(52, 211, 153, 0.25);
-    }
-
-    .badge-premium {
-      background: rgba(167, 139, 250, 0.12);
-      color: var(--accent-violet);
-      border: 1px solid rgba(167, 139, 250, 0.25);
-    }
-
-    /* Circular Progress */
-    .circular-progress {
-      position: relative;
-      width: 110px; height: 110px;
-    }
-
-    .circular-progress svg {
-      transform: rotate(-90deg);
-    }
-
-    .circular-progress .track {
-      fill: none;
-      stroke: var(--bg-input);
-      stroke-width: 8;
-    }
-
-    .circular-progress .fill {
-      fill: none;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 283;
-      stroke-dashoffset: 283;
-      transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .fill-perfect { stroke: url(#grad-perfect); }
-    .fill-budget  { stroke: var(--accent-green); }
-    .fill-premium { stroke: var(--accent-violet); }
-
-    .circular-percent {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1px;
-    }
-
-    .circular-percent .pct-value {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1;
-    }
-
-    .circular-percent .pct-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .result-phone-name {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    .result-brand {
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    .result-price {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--accent-gold);
-    }
-
-    .result-specs {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .spec-chip {
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 7px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .spec-chip .spec-icon { font-size: 13px; }
-
-    .spec-chip .spec-val {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .spec-chip .spec-key {
-      font-size: 0.68rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-    }
-
-    /* ========================================
-       RESTART BUTTON
-    ======================================== */
-    .restart-row {
-      display: flex;
-      justify-content: center;
-      margin-top: 36px;
-    }
-
-    /* ========================================
-       RESPONSIVE
-    ======================================== */
-    @media (max-width: 600px) {
-      .glass-card { padding: 28px 20px; }
-      .sliders-grid { grid-template-columns: 1fr; }
-      .step-connector { width: 30px; }
-      .btn-row { flex-direction: column-reverse; }
-      .btn { width: 100%; justify-content: center; }
-    }
-
-    /* ========================================
-       LOADING STATE
-    ======================================== */
-    .loading-overlay {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 60px;
-    }
-
-    .spinner {
-      width: 50px; height: 50px;
-      border-radius: 50%;
-      border: 3px solid var(--border-subtle);
-      border-top-color: var(--accent-primary);
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1rem;
-      color: var(--text-secondary);
-    }
-
-    /* ========================================
-       MISC
-    ======================================== */
-    .divider {
-      height: 1px;
-      background: var(--border-subtle);
-      margin: 24px 0;
-    }
-
-    .feature-tip {
-      background: rgba(34, 211, 238, 0.06);
-      border: 1px solid rgba(34, 211, 238, 0.15);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .feature-tip .tip-icon { font-size: 18px; flex-shrink: 0; }
-
-    .feature-tip p {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .feature-tip strong { color: var(--accent-cyan); }
-
-    .hidden { display: none !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentimetrics — Phone Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-deep:    #1a4b7c;
+    --blue-mid:     #2d7dd2;
+    --blue-light:   #5ba4e6;
+    --blue-pale:    #daeaf9;
+    --blue-frost:   #f0f7ff;
+    --white:        #ffffff;
+    --off-white:    #f8fafd;
+    --text-dark:    #12253a;
+    --text-mid:     #3d5a78;
+    --text-muted:   #7b96b2;
+    --border:       #d0e4f5;
+    --shadow-sm:    0 2px 12px rgba(26,75,124,0.07);
+    --shadow-md:    0 8px 32px rgba(26,75,124,0.12);
+    --shadow-lg:    0 20px 60px rgba(26,75,124,0.16);
+    --green:        #1a9e72;
+    --red:          #d64045;
+    --amber:        #e6952a;
+    --radius-sm:    8px;
+    --radius-md:    14px;
+    --radius-lg:    22px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body:    'DM Sans', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--off-white);
+    color: var(--text-dark);
+    min-height: 100vh;
+    background-image: radial-gradient(circle, #c5ddf0 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-attachment: fixed;
+  }
+
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(45,125,210,0.35);
+  }
+  .logo-text { font-family: var(--font-display); font-size: 22px; color: var(--text-dark); letter-spacing: -0.3px; }
+  .logo-text span { color: var(--blue-mid); }
+  .header-tagline { font-size: 13px; color: var(--text-muted); letter-spacing: 0.3px; }
+
+  .hero {
+    background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-mid) 60%, var(--blue-light) 100%);
+    padding: 52px 48px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero h1 { font-family: var(--font-display); font-size: 38px; color: var(--white); letter-spacing: -0.5px; margin-bottom: 10px; position: relative; }
+  .hero p { color: rgba(255,255,255,0.72); font-size: 15px; font-weight: 300; position: relative; }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .selector-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 36px;
+  }
+
+  .vs-badge {
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 700;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 46px; flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(45,125,210,0.4);
+  }
+
+  .phone-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-md);
+    transition: box-shadow 0.2s;
+  }
+  .phone-card:hover { box-shadow: var(--shadow-lg); }
+  .phone-card h3 { font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: 0.4px; margin-bottom: 18px; }
+  .card-a h3 { color: var(--blue-mid); }
+  .card-b h3 { color: var(--blue-deep); }
+  .card-a { border-top: 3px solid var(--blue-light); }
+  .card-b { border-top: 3px solid var(--blue-deep); }
+
+  .tab-row {
+    display: flex; gap: 8px; margin-bottom: 18px;
+    background: var(--blue-frost); border-radius: var(--radius-sm); padding: 4px;
+  }
+  .tab {
+    flex: 1; padding: 8px; border: none; border-radius: 6px;
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    font-size: 13px; font-family: var(--font-body); font-weight: 500; transition: all 0.18s;
+  }
+  .tab.active { background: var(--white); color: var(--blue-mid); box-shadow: 0 2px 8px rgba(45,125,210,0.15); }
+
+  select {
+    width: 100%; padding: 11px 36px 11px 14px;
+    background: var(--off-white); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text-dark);
+    font-size: 14px; font-family: var(--font-body); margin-bottom: 10px;
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237b96b2' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  select:focus { outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(45,125,210,0.12); }
+
+  .selected-label { font-size: 12px; color: var(--text-muted); min-height: 20px; font-style: italic; margin-top: 4px; }
+
+  .compare-wrap { text-align: center; margin-bottom: 44px; }
+  .btn-compare {
+    background: linear-gradient(135deg, var(--blue-mid) 0%, var(--blue-deep) 100%);
+    color: var(--white); border: none; padding: 16px 56px;
+    border-radius: 50px; font-size: 15px; font-weight: 600;
+    font-family: var(--font-body); cursor: pointer; letter-spacing: 0.4px;
+    box-shadow: 0 8px 28px rgba(45,125,210,0.38); transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .btn-compare:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(45,125,210,0.48); }
+  .btn-compare:active { transform: translateY(0); }
+  .btn-compare:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .error-box {
+    background: #fff0f0; border: 1px solid #f5c6c6; border-radius: var(--radius-sm);
+    padding: 12px 16px; color: var(--red); text-align: center;
+    margin-bottom: 20px; font-size: 14px; display: none;
+  }
+
+  .loading { text-align: center; padding: 48px; color: var(--text-muted); display: none; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--blue-pale); border-top-color: var(--blue-mid);
+    border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #results { display: none; }
+
+  .results-header { text-align: center; margin-bottom: 36px; }
+  .results-header h2 { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+  .results-header p { color: var(--text-muted); font-size: 13px; }
+  .name-a { color: var(--blue-mid); }
+  .name-b { color: var(--blue-deep); }
+
+  .section-divider { display: flex; align-items: center; gap: 16px; margin: 36px 0 28px; }
+  .section-divider span {
+    font-family: var(--font-display); font-size: 13px; font-weight: 600;
+    color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap;
+  }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .score-card {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius-md);
+    padding: 20px; box-shadow: var(--shadow-sm); transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .score-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+  .aspect-name {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text-muted); font-weight: 600; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--blue-frost);
+  }
+  .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .score-row .phone-name { font-size: 11px; color: var(--text-muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .score-val { font-size: 16px; font-weight: 700; font-family: var(--font-display); }
+  .score-bar { height: 5px; border-radius: 3px; background: var(--blue-frost); overflow: hidden; margin-bottom: 4px; }
+  .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+  .bar-a .score-bar-fill { background: var(--blue-light); }
+  .bar-b .score-bar-fill { background: var(--blue-deep); }
+
+  .winner-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.3px; display: inline-block; margin-top: 10px; }
+  .winner-a { background: var(--blue-pale); color: var(--blue-mid); }
+  .winner-b { background: #dbeafe; color: var(--blue-deep); }
+  .winner-tie { background: #f1f5f9; color: var(--text-muted); }
+
+  .chart-card {
+    background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+    padding: 32px; margin-bottom: 32px; box-shadow: var(--shadow-md);
+  }
+  .chart-card h3 { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--text-dark); margin-bottom: 24px; }
+
+  .winner-summary {
+    background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-mid) 100%);
+    border-radius: var(--radius-lg); padding: 36px 28px; text-align: center;
+    box-shadow: var(--shadow-lg); position: relative; overflow: hidden; margin-bottom: 32px;
+  }
+  .winner-summary::before {
+    content: '★'; position: absolute; font-size: 180px; color: rgba(255,255,255,0.04);
+    top: -30px; right: -20px; line-height: 1; pointer-events: none;
+  }
+  .winner-summary h3 { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; margin-bottom: 14px; }
+  .winner-name { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+  .winner-desc { color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 300; }
+
+  footer { text-align: center; padding: 28px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border); background: var(--white); margin-top: 48px; }
+
+  @media (max-width: 700px) {
+    .selector-row { grid-template-columns: 1fr; }
+    .vs-badge { margin: 0 auto; }
+    header { padding: 0 20px; }
+    .hero { padding: 36px 24px 40px; }
+    .hero h1 { font-size: 28px; }
+    main { padding: 32px 16px 60px; }
+  }
+
+  .breakdown-aspect { margin-bottom: 28px; }
+  .breakdown-aspect h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 12px; }
+  .breakdown-row { display: grid; grid-template-columns: 80px 1fr 1fr; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .breakdown-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .breakdown-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .breakdown-bar-bg { flex: 1; height: 10px; border-radius: 5px; background: var(--blue-frost); overflow: hidden; }
+  .breakdown-bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+  .breakdown-pct { font-size: 11px; font-weight: 600; min-width: 34px; text-align: right; }
+  .fill-pos-a { background: #30088e; } .fill-pos-b { background: #0f6344; }
+  .fill-neg-a { background: #d64045; } .fill-neg-b { background: #8b1a1d; }
+  .fill-neu-a { background: #e6952a; } .fill-neu-b { background: #9e6010; }
+
+  .ai-summary-text { font-size: 14px; line-height: 1.9; color: var(--text-mid); white-space: pre-wrap; }
+  .ai-typing::after { content: '▌'; animation: blink 0.7s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
 </head>
 <body>
 
-<!-- Background decoration -->
-<div class="bg-orbs">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
-<div class="bg-grid"></div>
-
-<!-- SVG gradient defs (hidden) -->
-<svg width="0" height="0" style="position:absolute">
-  <defs>
-    <linearGradient id="grad-perfect" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4f8ef7"/>
-      <stop offset="100%" stop-color="#22d3ee"/>
-    </linearGradient>
-    <linearGradient id="grad-premium" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#fb7185"/>
-    </linearGradient>
-  </defs>
-</svg>
-
-<div class="app-wrapper">
-  <div class="container">
-
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-badge">
-        <span class="dot"></span>
-        AI-Powered · Content-Based Filtering
-      </div>
-      <h1>Find Your Perfect Phone</h1>
-      <p>Answer 4 quick steps to let our recommendation engine match you with the ideal smartphone — powered by real machine learning math.</p>
-    </header>
-
-    <!-- PROGRESS NAV -->
-    <nav class="progress-nav" id="progressNav" aria-label="Wizard steps">
-      <!-- Dynamically rendered by JS -->
-    </nav>
-
-    <!-- MAIN CONTENT -->
-    <main id="appMain">
-      <!-- Dynamically rendered by JS -->
-    </main>
-
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon"></div>
+    <div>
+      <div class="logo-text">Senti<span>metrics</span></div>
+    </div>
   </div>
+  <div class="header-tagline">Aspect-Based Sentiment Analysis · Mobile Phones</div>
+</header>
+
+<div class="hero">
+  <h1>Compare Any Two Phones</h1>
+  <p>Real customer reviews · Aspect-level sentiment · Instant comparison</p>
 </div>
 
-<script type="module">
-// ============================================================
-//  DATA — 10 phones, 14 attributes each
-// ============================================================
-const phones = [
-  { id:1, name:"Samsung Galaxy S25 Ultra", brand:"Samsung",
-    price:129999, battery:5000, screen:6.8, storage:512, processor:3.39, camera:200, charging:45,
-    performance:10, quality:9, sound:8, design:9, network:10, software:9, build:10 },
-  { id:2, name:"Apple iPhone 16 Pro", brand:"Apple",
-    price:119900, battery:3274, screen:6.3, storage:256, processor:3.78, camera:48, charging:27,
-    performance:10, quality:10, sound:9, design:10, network:9, software:10, build:10 },
-  { id:3, name:"Google Pixel 9 Pro", brand:"Google",
-    price:109999, battery:4700, screen:6.3, storage:256, processor:3.1, camera:50, charging:37,
-    performance:9, quality:9, sound:8, design:9, network:9, software:10, build:9 },
-  { id:4, name:"OnePlus 12", brand:"OnePlus",
-    price:64999, battery:5400, screen:6.82, storage:256, processor:3.3, camera:50, charging:100,
-    performance:9, quality:8, sound:8, design:8, network:8, software:8, build:8 },
-  { id:5, name:"Xiaomi 14 Ultra", brand:"Xiaomi",
-    price:99999, battery:5000, screen:6.73, storage:512, processor:3.3, camera:50, charging:90,
-    performance:9, quality:9, sound:8, design:9, network:9, software:7, build:9 },
-  { id:6, name:"Samsung Galaxy A55", brand:"Samsung",
-    price:38999, battery:5000, screen:6.6, storage:128, processor:2.75, camera:50, charging:25,
-    performance:7, quality:7, sound:6, design:7, network:7, software:7, build:7 },
-  { id:7, name:"Motorola Edge 50 Pro", brand:"Motorola",
-    price:31999, battery:4500, screen:6.7, storage:256, processor:2.96, camera:50, charging:125,
-    performance:8, quality:7, sound:7, design:8, network:8, software:8, build:7 },
-  { id:8, name:"Nothing Phone (2a)", brand:"Nothing",
-    price:18999, battery:5000, screen:6.7, storage:128, processor:2.85, camera:50, charging:45,
-    performance:7, quality:7, sound:6, design:9, network:7, software:8, build:8 },
-  { id:9, name:"ASUS ROG Phone 8 Pro", brand:"ASUS",
-    price:94999, battery:5500, screen:6.78, storage:512, processor:3.39, camera:50, charging:65,
-    performance:10, quality:8, sound:10, design:7, network:9, software:8, build:9 },
-  { id:10, name:"Realme 12 Pro+", brand:"Realme",
-    price:27999, battery:5000, screen:6.7, storage:256, processor:2.21, camera:64, charging:67,
-    performance:7, quality:7, sound:6, design:8, network:7, software:6, build:7 },
-];
+<main>
 
-// ============================================================
-//  FEATURE CONFIG
-// ============================================================
-const FEATURE_CONFIG = {
-  price:       { label:"Price",       unit:"₹",    min:10000, max:140000, step:1000, icon:"💰" },
-  battery:     { label:"Battery",     unit:"mAh",  min:2000, max:6000, step:100, icon:"🔋" },
-  screen:      { label:"Screen",      unit:"in",   min:5.0,  max:7.2,  step:0.1, icon:"📐" },
-  storage:     { label:"Storage",     unit:"GB",   min:64,   max:1024, step:64,  icon:"💾" },
-  processor:   { label:"Processor",   unit:"GHz",  min:1.5,  max:4.0,  step:0.1, icon:"⚡" },
-  camera:      { label:"Camera",      unit:"MP",   min:12,   max:200,  step:2,   icon:"📷" },
-  charging:    { label:"Charging",    unit:"W",    min:15,   max:125,  step:5,   icon:"🔌" },
-  network:     { label:"Network",     unit:"/10",  min:1,    max:10,   step:1,   icon:"📶" },
-  performance: { label:"Performance", unit:"/10",  min:1,    max:10,   step:1,   icon:"🚀" },
-  quality:     { label:"Quality",     unit:"/10",  min:1,    max:10,   step:1,   icon:"✨" },
-  sound:       { label:"Sound",       unit:"/10",  min:1,    max:10,   step:1,   icon:"🔊" },
-  design:      { label:"Design",      unit:"/10",  min:1,    max:10,   step:1,   icon:"🎨" },
-  software:    { label:"Software",    unit:"/10",  min:1,    max:10,   step:1,   icon:"🖥️"  },
-  build:       { label:"Build",       unit:"/10",  min:1,    max:10,   step:1,   icon:"🏗️"  },
-};
+  <div class="selector-row">
+    <div class="phone-card card-a">
+      <h3>Phone A</h3>
+      <div class="tab-row">
+        <button class="tab active" onclick="setTab('a','brand',this)">By Brand</button>
+        <button class="tab" onclick="setTab('a','model',this)">By Model</button>
+      </div>
+      <div id="a-brand-section">
+        <select id="a-brand" onchange="onBrandChange('a')">
+          <option value="">— Select Brand —</option>
+          {% for b in brands %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+        </select>
+      </div>
+      <div id="a-model-section" style="display:none">
+        <select id="a-brand-for-model" onchange="loadModels('a')">
+          <option value="">— Select Brand —</option>
+          {% for b in brands %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+        </select>
+        <select id="a-model"><option value="">— Select Model —</option></select>
+      </div>
+      <div class="selected-label" id="a-selected">Nothing selected yet</div>
+    </div>
 
-const ALL_FEATURES = Object.keys(FEATURE_CONFIG);
+    <div class="vs-badge">VS</div>
 
-// ============================================================
-//  WIZARD STEP DEFINITIONS
-// ============================================================
-const STEPS = [
-  {
-    id: "basics",
-    label: "The Basics",
-    title: "Core Specifications",
-    description: "Set your ideal ranges for price and the fundamental specs.",
-    features: ["price","battery","screen","storage"],
-    tip: null,
-  },
-  {
-    id: "engine",
-    label: "The Engine",
-    title: "Performance Hardware",
-    description: "Configure processor speed, camera resolution, fast-charging, and connectivity.",
-    features: ["processor","camera","charging","network"],
-    tip: null,
-  },
-  {
-    id: "experience",
-    label: "The Experience",
-    title: "User Experience",
-    description: "Rate how much you care about software, sound, build quality, and aesthetics.",
-    features: ["performance","quality","sound","design","software","build"],
-    tip: null,
-  },
-  {
-    id: "dealbreaker",
-    label: "Dealbreaker",
-    title: "Your #1 Priority",
-    description: "Pick the single most important attribute. Our engine will apply a 5× weight multiplier to maximize influence on your results.",
-    features: null,
-    tip: "The Dealbreaker feature receives a <strong>5× weight multiplier</strong> in the Weighted Euclidean Distance formula — making mismatches on this attribute far more costly.",
-  },
-];
+    <div class="phone-card card-b">
+      <h3>Phone B</h3>
+      <div class="tab-row">
+        <button class="tab active" onclick="setTab('b','brand',this)">By Brand</button>
+        <button class="tab" onclick="setTab('b','model',this)">By Model</button>
+      </div>
+      <div id="b-brand-section">
+        <select id="b-brand" onchange="onBrandChange('b')">
+          <option value="">— Select Brand —</option>
+          {% for b in brands %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+        </select>
+      </div>
+      <div id="b-model-section" style="display:none">
+        <select id="b-brand-for-model" onchange="loadModels('b')">
+          <option value="">— Select Brand —</option>
+          {% for b in brands %}<option value="{{ b }}">{{ b }}</option>{% endfor %}
+        </select>
+        <select id="b-model"><option value="">— Select Model —</option></select>
+      </div>
+      <div class="selected-label" id="b-selected">Nothing selected yet</div>
+    </div>
+  </div>
 
-// ============================================================
-//  ENGINE — Min-Max Normalization + Weighted Euclidean Distance
-// ============================================================
-function normalize(feature, value) {
-  const { min, max } = FEATURE_CONFIG[feature];
-  if (max === min) return 0;
-  return (value - min) / (max - min);
+  <div class="compare-wrap">
+    <div class="error-box" id="error-box"></div>
+    <button class="btn-compare" onclick="compare()">Compare Phones</button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Analysing sentiments…</div>
+  </div>
+
+  <div id="results">
+    <div class="results-header">
+      <h2>
+        <span class="name-a" id="res-label-a"></span>
+        &nbsp;vs&nbsp;
+        <span class="name-b" id="res-label-b"></span>
+      </h2>
+      <p>Sentiment scores based on real customer reviews · Score range: −100 (all negative) to +100 (all positive)</p>
+    </div>
+
+    <div class="section-divider"><span>Aspect Breakdown</span></div>
+    <div class="score-grid" id="score-grid"></div>
+
+    <div class="section-divider"><span>Visual Comparison</span></div>
+    <div class="chart-card">
+      <h3>Sentiment Score by Aspect</h3>
+      <canvas id="barChart" height="100"></canvas>
+    </div>
+
+    <div class="section-divider"><span>Sentiment Breakdown</span></div>
+    <div class="chart-card">
+      <h3>Positive · Negative · Neutral % per Aspect</h3>
+      <div id="breakdown-charts"></div>
+    </div>
+
+    <div class="section-divider"><span>Overall Winner</span></div>
+    <div class="winner-summary">
+      <h3>🏆 Overall Winner</h3>
+      <div class="winner-name" id="winner-name"></div>
+      <div class="winner-desc" id="winner-desc"></div>
+    </div>
+
+    <div class="section-divider"><span>AI Analysis</span></div>
+    <div class="chart-card" id="ai-summary-card">
+      <h3>AI Summary</h3>
+      <div id="ai-summary" style="color:var(--text-mid);font-size:14px;line-height:1.8;">
+        <div class="spinner" style="display:block;margin:0 auto"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Sentimetrics · Aspect-Based Sentiment Analysis for Mobile Phones
+</footer>
+
+<script>
+const brandModels = {{ brand_models | safe }};
+const tabs = { a: 'brand', b: 'brand' };
+let barChart = null;
+
+function setTab(side, type, btn) {
+  tabs[side] = type;
+  btn.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`${side}-brand-section`).style.display = type === 'brand' ? '' : 'none';
+  document.getElementById(`${side}-model-section`).style.display = type === 'model' ? '' : 'none';
+  updateSelected(side);
 }
 
-function buildVector(obj) {
-  return ALL_FEATURES.map(f => normalize(f, obj[f]));
+function onBrandChange(side) { updateSelected(side); }
+
+function loadModels(side) {
+  const brand = document.getElementById(`${side}-brand-for-model`).value;
+  const modelSel = document.getElementById(`${side}-model`);
+  modelSel.innerHTML = '<option value="">— Select Model —</option>';
+  if (brand && brandModels[brand]) {
+    brandModels[brand].forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m.length > 60 ? m.slice(0,60)+'…' : m;
+      modelSel.appendChild(opt);
+    });
+  }
+  modelSel.onchange = () => updateSelected(side);
+  updateSelected(side);
 }
 
-function weightedEuclidean(vecA, vecB, dealbreaker) {
-  const DEALBREAKER_WEIGHT = 5.0;
-  let sumSq = 0;
-  ALL_FEATURES.forEach((f, i) => {
-    const w = f === dealbreaker ? DEALBREAKER_WEIGHT : 1.0;
-    const d = vecA[i] - vecB[i];
-    sumSq += w * d * d;
+function updateSelected(side) {
+  const el  = document.getElementById(`${side}-selected`);
+  const val = getSelection(side);
+  el.textContent = val ? `Selected: ${val.value}` : 'Nothing selected yet';
+}
+
+function getSelection(side) {
+  if (tabs[side] === 'brand') {
+    const v = document.getElementById(`${side}-brand`).value;
+    return v ? { type:'brand', value:v } : null;
+  } else {
+    const v = document.getElementById(`${side}-model`).value;
+    return v ? { type:'model', value:v } : null;
+  }
+}
+
+async function compare() {
+  const selA = getSelection('a');
+  const selB = getSelection('b');
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('results').style.display   = 'none';
+
+  if (!selA || !selB)            { showError('Please select both phones before comparing.'); return; }
+  if (selA.value === selB.value) { showError('Please select two different phones.');         return; }
+
+  document.getElementById('loading').style.display = 'block';
+  try {
+    const resp = await fetch('/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type_a:selA.type, value_a:selA.value,
+                             type_b:selB.type, value_b:selB.value })
+    });
+    const data = await resp.json();
+    if (data.error) { showError(data.error); return; }
+    renderResults(data);
+  } catch(e) {
+    showError('Something went wrong. Please try again.');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function scoreColor(s) {
+  if (s >= 30) return '#1a9e72';
+  if (s >= 0)  return '#e6952a';
+  return '#d64045';
+}
+
+function renderResults(data) {
+  const { label_a, label_b, aspects, scores_a, scores_b } = data;
+  const nameA = label_a.length > 35 ? label_a.slice(0,35)+'…' : label_a;
+  const nameB = label_b.length > 35 ? label_b.slice(0,35)+'…' : label_b;
+
+  document.getElementById('res-label-a').textContent = nameA;
+  document.getElementById('res-label-b').textContent = nameB;
+
+  const grid = document.getElementById('score-grid');
+  grid.innerHTML = '';
+  let winsA = 0, winsB = 0, totalA = 0, totalB = 0;
+
+  aspects.forEach(asp => {
+    const sa = scores_a[asp].score;
+    const sb = scores_b[asp].score;
+    totalA += sa; totalB += sb;
+    const winner = sa > sb ? 'a' : sb > sa ? 'b' : 'tie';
+    if (winner === 'a') winsA++; else if (winner === 'b') winsB++;
+    const pctA = Math.max(0, Math.min(100, (sa + 100) / 2));
+    const pctB = Math.max(0, Math.min(100, (sb + 100) / 2));
+
+    grid.innerHTML += `
+      <div class="score-card">
+        <div class="aspect-name">${asp}</div>
+        <div class="score-row">
+          <span class="phone-name" style="color:var(--blue-mid)">${nameA}</span>
+          <span class="score-val" style="color:${scoreColor(sa)}">${sa>0?'+':''}${sa}</span>
+        </div>
+        <div class="score-bar bar-a"><div class="score-bar-fill" style="width:${pctA}%"></div></div>
+        <div class="score-row" style="margin-top:10px">
+          <span class="phone-name" style="color:var(--blue-deep)">${nameB}</span>
+          <span class="score-val" style="color:${scoreColor(sb)}">${sb>0?'+':''}${sb}</span>
+        </div>
+        <div class="score-bar bar-b"><div class="score-bar-fill" style="width:${pctB}%"></div></div>
+        <div style="text-align:right">
+          <span class="winner-badge ${winner==='a'?'winner-a':winner==='b'?'winner-b':'winner-tie'}">
+            ${winner==='a'?'▲ '+nameA.split(' ')[0]:winner==='b'?'▲ '+nameB.split(' ')[0]:'Tie'}
+          </span>
+        </div>
+      </div>`;
   });
-  return Math.sqrt(sumSq);
-}
 
-function distanceToPercent(distance, maxDistance) {
-  if (maxDistance === 0) return 100;
-  return Math.round((1 - distance / maxDistance) * 100);
-}
-
-function getRecommendations(userPrefs, dealbreaker) {
-  const userVec = buildVector(userPrefs);
-  const scored = phones.map(phone => ({
-    phone,
-    distance: weightedEuclidean(userVec, buildVector(phone), dealbreaker),
-  }));
-  scored.sort((a, b) => a.distance - b.distance);
-  const maxDist = scored[scored.length - 1].distance;
-  return scored.map(item => ({ ...item, matchPercent: distanceToPercent(item.distance, maxDist) }));
-}
-
-function selectTop3(recs) {
-  const perfect = recs[0];
-  const perfectPrice = perfect.phone.price;
-  const budgetCandidates  = recs.slice(1).filter(r => r.phone.price < perfectPrice);
-  const premiumCandidates = recs.slice(1).filter(r => r.phone.price > perfectPrice);
-  return {
-    perfect,
-    budget:  budgetCandidates.length  > 0 ? budgetCandidates[0]  : recs[1],
-    premium: premiumCandidates.length > 0 ? premiumCandidates[0] : (recs[2] || recs[1]),
-  };
-}
-
-// ============================================================
-//  APP STATE
-// ============================================================
-const defaultPrefs = {};
-ALL_FEATURES.forEach(f => {
-  const cfg = FEATURE_CONFIG[f];
-  defaultPrefs[f] = Math.round((cfg.min + cfg.max) / 2 / cfg.step) * cfg.step;
-});
-
-let state = {
-  step: 0,         // 0-3 = wizard steps, 4 = results
-  prefs: { ...defaultPrefs },
-  dealbreaker: null,
-  results: null,
-};
-
-// ============================================================
-//  RENDER HELPERS
-// ============================================================
-function formatValue(feature, value) {
-  const cfg = FEATURE_CONFIG[feature];
-  if (cfg.unit === "₹") return `₹${value.toLocaleString('en-IN')}`;
-  if (cfg.unit === "mAh") return `${value.toLocaleString('en-IN')} mAh`;
-  if (cfg.unit === "in") return `${value.toFixed(1)}"`;
-  if (cfg.unit === "GB") return `${value} GB`;
-  if (cfg.unit === "GHz") return `${value.toFixed(1)} GHz`;
-  if (cfg.unit === "MP") return `${value} MP`;
-  if (cfg.unit === "W") return `${value} W`;
-  if (cfg.unit === "/10") return `${value} / 10`;
-  return value;
-}
-
-function getFillPercent(feature, value) {
-  const { min, max } = FEATURE_CONFIG[feature];
-  return ((value - min) / (max - min)) * 100;
-}
-
-// ============================================================
-//  RENDER PROGRESS NAV
-// ============================================================
-function renderProgressNav() {
-  const nav = document.getElementById('progressNav');
-  const stepLabels = [...STEPS.map(s => s.label), 'Results'];
-  const totalSteps = STEPS.length; // 0-3 wizard, 4 = results (hide from nav)
-
-  let html = '';
-  STEPS.forEach((s, i) => {
-    const isDone   = state.step > i;
-    const isActive = state.step === i && state.step < 4;
-    const circleClass = isDone ? 'done' : (isActive ? 'active' : '');
-    const labelClass  = isDone ? 'done' : (isActive ? 'active' : '');
-    const icon = isDone ? '✓' : (i + 1);
-
-    html += `<div class="step-wrapper">
-      <div class="step-circle ${circleClass}" id="step-circle-${i}">${icon}</div>
-      <div class="step-label ${labelClass}">${s.label}</div>
-    </div>`;
-
-    if (i < STEPS.length - 1) {
-      html += `<div class="step-connector ${isDone ? 'done' : ''}"></div>`;
+  if (barChart) barChart.destroy();
+  const ctx = document.getElementById('barChart').getContext('2d');
+  barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: aspects.map(a => a.charAt(0).toUpperCase() + a.slice(1)),
+      datasets: [
+        { label: nameA, data: aspects.map(a => scores_a[a].score),
+          backgroundColor: 'rgba(91,164,230,0.75)', borderColor: '#5ba4e6', borderWidth: 1.5, borderRadius: 6 },
+        { label: nameB, data: aspects.map(a => scores_b[a].score),
+          backgroundColor: 'rgba(26,75,124,0.75)', borderColor: '#1a4b7c', borderWidth: 1.5, borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#3d5a78', font: { size: 13 } } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw>0?'+':''}${c.raw}` } }
+      },
+      scales: {
+        x: { ticks: { color: '#7b96b2' }, grid: { color: '#daeaf9' } },
+        y: { ticks: { color: '#7b96b2', callback: v => (v>0?'+':'')+v }, grid: { color: '#daeaf9' }, min: -100, max: 100 }
+      }
     }
   });
 
-  nav.innerHTML = html;
-  nav.style.display = state.step >= 4 ? 'none' : '';
-}
+  const breakdown = document.getElementById('breakdown-charts');
+  breakdown.innerHTML = '';
+  aspects.forEach(asp => {
+    const a = scores_a[asp];
+    const b = scores_b[asp];
+    const posA = a.positive_pct, posB = b.positive_pct;
+    const negA = Math.max(0, posA - a.score).toFixed(1);
+    const negB = Math.max(0, posB - b.score).toFixed(1);
+    const neuA = Math.max(0, 100 - posA - negA).toFixed(1);
+    const neuB = Math.max(0, 100 - posB - negB).toFixed(1);
 
-// ============================================================
-//  RENDER SLIDER
-// ============================================================
-function renderSlider(feature) {
-  const cfg = FEATURE_CONFIG[feature];
-  const val = state.prefs[feature];
-  const fillPct = getFillPercent(feature, val);
-
-  return `
-    <div class="slider-group" id="sg-${feature}">
-      <div class="slider-header">
-        <span class="slider-label">${cfg.icon} ${cfg.label}</span>
-        <span class="slider-value" id="sv-${feature}">${formatValue(feature, val)}</span>
-      </div>
-      <div class="slider-track-wrapper" id="tw-${feature}">
-        <div class="slider-fill" id="sf-${feature}" style="width:${fillPct}%"></div>
-        <div class="slider-thumb" id="st-${feature}" style="left:${fillPct}%"></div>
-        <input
-          type="range"
-          id="sl-${feature}"
-          data-feature="${feature}"
-          min="${cfg.min}"
-          max="${cfg.max}"
-          step="${cfg.step}"
-          value="${val}"
-          aria-label="${cfg.label}"
-        />
-      </div>
-    </div>`;
-}
-
-// ============================================================
-//  RENDER WIZARD STEP
-// ============================================================
-function renderWizardStep(stepIdx) {
-  const step = STEPS[stepIdx];
-  const isFirst = stepIdx === 0;
-  const isLast  = stepIdx === STEPS.length - 1;
-
-  let bodyHtml = '';
-
-  if (step.tip) {
-    bodyHtml += `
-      <div class="feature-tip">
-        <span class="tip-icon">💡</span>
-        <p>${step.tip}</p>
+    const row = (label, valA, valB, fillA, fillB) => `
+      <div class="breakdown-row">
+        <span class="breakdown-label">${label}</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${fillA}" style="width:${valA}%"></div></div>
+          <span class="breakdown-pct" style="color:var(--blue-mid)">${parseFloat(valA).toFixed(0)}%</span>
+        </div>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar-bg"><div class="breakdown-bar-fill ${fillB}" style="width:${valB}%"></div></div>
+          <span class="breakdown-pct" style="color:var(--blue-deep)">${parseFloat(valB).toFixed(0)}%</span>
+        </div>
       </div>`;
-  }
 
-  if (step.features) {
-    bodyHtml += `<div class="sliders-grid">
-      ${step.features.map(renderSlider).join('')}
-    </div>`;
-  } else {
-    // Dealbreaker step
-    bodyHtml += `<div class="dealbreaker-grid">
-      ${ALL_FEATURES.map(f => {
-        const cfg = FEATURE_CONFIG[f];
-        const checked = state.dealbreaker === f;
-        return `
-          <div class="db-option">
-            <input type="radio" name="dealbreaker" id="db-${f}" value="${f}" ${checked ? 'checked' : ''} />
-            <label class="db-label" for="db-${f}">
-              <span class="db-icon">${cfg.icon}</span>
-              <span class="db-text">${cfg.label}</span>
-              <span class="db-check">${checked ? '✓' : ''}</span>
-            </label>
-          </div>`;
-      }).join('')}
-    </div>`;
-  }
-
-  const canProceed = isLast ? (state.dealbreaker !== null) : true;
-
-  const html = `
-    <div class="glass-card">
-      <div class="card-header">
-        <div class="step-tag">Step ${stepIdx + 1} of ${STEPS.length}</div>
-        <h2>${step.title}</h2>
-        <p>${step.description}</p>
-      </div>
-      ${bodyHtml}
-      <div class="btn-row">
-        ${isFirst
-          ? `<button class="btn btn-ghost" id="btnReset">↺ Reset</button>`
-          : `<button class="btn btn-secondary" id="btnBack">← Back</button>`}
-        ${isLast
-          ? `<button class="btn btn-cta" id="btnFind" ${canProceed ? '' : 'disabled'}>🔍 Find My Phone</button>`
-          : `<button class="btn btn-primary" id="btnNext">Next Step →</button>`}
-      </div>
-    </div>`;
-
-  return html;
-}
-
-// ============================================================
-//  RENDER CIRCULAR PROGRESS
-// ============================================================
-function renderCircle(pct, type) {
-  const r = 45;
-  const circumference = 2 * Math.PI * r; // ≈ 283
-  const offset = circumference - (pct / 100) * circumference;
-  const fillClass = `fill-${type}`;
-  const strokeVal = type === 'premium' ? 'url(#grad-premium)' : '';
-
-  return `
-    <div class="circular-progress" data-pct="${pct}" data-type="${type}">
-      <svg width="110" height="110" viewBox="0 0 110 110">
-        <circle class="track" cx="55" cy="55" r="${r}" />
-        <circle class="${fillClass} fill" cx="55" cy="55" r="${r}"
-          stroke-dasharray="${circumference}"
-          stroke-dashoffset="${circumference}"
-          id="circle-${type}" />
-      </svg>
-      <div class="circular-percent">
-        <span class="pct-value" id="pct-val-${type}">0%</span>
-        <span class="pct-label">Match</span>
-      </div>
-    </div>`;
-}
-
-// ============================================================
-//  RENDER RESULT CARD
-// ============================================================
-function renderResultCard(item, type, badgeLabel) {
-  const { phone, matchPercent } = item;
-  const badgeClass = `badge-${type}`;
-  const featured = type === 'perfect' ? 'featured' : '';
-
-  return `
-    <div class="result-card ${featured}">
-      <div class="result-badge ${badgeClass}">${badgeLabel}</div>
-      ${renderCircle(matchPercent, type)}
-      <div>
-        <div class="result-brand">${phone.brand}</div>
-        <div class="result-phone-name">${phone.name}</div>
-      </div>
-      <div class="result-price">₹${phone.price.toLocaleString('en-IN')}</div>
-      <div class="result-specs">
-        <div class="spec-chip">
-          <span class="spec-icon">🔋</span>
-          <span class="spec-val">${phone.battery.toLocaleString()}</span>
-          <span class="spec-key">mAh</span>
-        </div>
-        <div class="spec-chip">
-          <span class="spec-icon">📷</span>
-          <span class="spec-val">${phone.camera} MP</span>
-          <span class="spec-key">Camera</span>
-        </div>
-        <div class="spec-chip">
-          <span class="spec-icon">💾</span>
-          <span class="spec-val">${phone.storage} GB</span>
-          <span class="spec-key">Storage</span>
-        </div>
-        <div class="spec-chip">
-          <span class="spec-icon">🔌</span>
-          <span class="spec-val">${phone.charging} W</span>
-          <span class="spec-key">Charging</span>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ============================================================
-//  RENDER RESULTS
-// ============================================================
-function renderResults() {
-  const { perfect, budget, premium } = state.results;
-  const dbLabel = state.dealbreaker
-    ? `Dealbreaker: <strong style="color:var(--accent-cyan)">${FEATURE_CONFIG[state.dealbreaker].label}</strong>`
-    : 'No dealbreaker selected';
-
-  const html = `
-    <div class="results-section">
-      <div class="results-header">
-        <h2>🎯 Your Top Matches</h2>
-        <p>Based on your preferences — ${dbLabel}</p>
-      </div>
-      <div class="results-grid" id="resultsGrid">
-        ${renderResultCard(perfect, 'perfect', '⭐ Perfect Match')}
-        ${renderResultCard(budget,  'budget',  '💚 Budget Pick')}
-        ${renderResultCard(premium, 'premium', '💜 Premium Upgrade')}
-      </div>
-      <div class="restart-row">
-        <button class="btn btn-secondary" id="btnRestart">← Start Over</button>
-      </div>
-    </div>`;
-
-  return html;
-}
-
-// ============================================================
-//  ANIMATE CIRCLES AFTER RENDER
-// ============================================================
-function animateCircles() {
-  const types = ['perfect', 'budget', 'premium'];
-  types.forEach((type, i) => {
-    const circle = document.getElementById(`circle-${type}`);
-    const pctEl  = document.getElementById(`pct-val-${type}`);
-    const wrapper = circle?.closest('.circular-progress');
-    if (!circle || !pctEl || !wrapper) return;
-
-    const targetPct = parseInt(wrapper.dataset.pct);
-    const circumference = 283;
-
-    setTimeout(() => {
-      // Animate stroke
-      const offset = circumference - (targetPct / 100) * circumference;
-      circle.style.strokeDashoffset = offset;
-
-      // Animate number
-      let current = 0;
-      const duration = 1200;
-      const startTime = performance.now();
-      function tick(now) {
-        const progress = Math.min((now - startTime) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        current = Math.round(eased * targetPct);
-        pctEl.textContent = `${current}%`;
-        if (progress < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }, i * 150);
+    breakdown.innerHTML += `
+      <div class="breakdown-aspect">
+        <h4>${asp}
+          <span style="float:right;font-size:11px;font-weight:400">
+            <span style="color:var(--blue-mid)">${nameA}</span> &nbsp;vs&nbsp;
+            <span style="color:var(--blue-deep)">${nameB}</span>
+          </span>
+        </h4>
+        ${row(' Positive', posA, posB, 'fill-pos-a', 'fill-pos-b')}
+        ${row(' Negative', negA, negB, 'fill-neg-a', 'fill-neg-b')}
+        ${row(' Neutral',  neuA, neuB, 'fill-neu-a', 'fill-neu-b')}
+        <hr style="border:none;border-top:1px solid var(--border);margin-top:12px">
+      </div>`;
   });
+
+  const avgA = (totalA / aspects.length).toFixed(1);
+  const avgB = (totalB / aspects.length).toFixed(1);
+  const aWins = parseFloat(avgA) >= parseFloat(avgB);
+  document.getElementById('winner-name').textContent = aWins ? nameA : nameB;
+  document.getElementById('winner-desc').textContent =
+    `Wins ${aWins ? winsA : winsB} out of ${aspects.length} aspects · Average score: ${aWins ? avgA : avgB}`;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+  generateAISummary(nameA, nameB, aspects, scores_a, scores_b);
 }
 
-// ============================================================
-//  BIND EVENTS
-// ============================================================
-function bindSliderEvents() {
-  ALL_FEATURES.forEach(feature => {
-    const input = document.getElementById(`sl-${feature}`);
-    if (!input) return;
+async function generateAISummary(nameA, nameB, aspects, scores_a, scores_b) {
+  const summaryEl = document.getElementById('ai-summary');
+  summaryEl.innerHTML = '<div class="spinner" style="display:block;margin:0 auto"></div>';
 
-    input.addEventListener('input', (e) => {
-      const raw = parseFloat(e.target.value);
-      const cfg = FEATURE_CONFIG[feature];
-      const val  = cfg.unit === 'in' ? Math.round(raw / cfg.step) * cfg.step : parseInt(raw);
-      state.prefs[feature] = val;
+  const lines = aspects.map(asp => {
+    const sa = scores_a[asp], sb = scores_b[asp];
+    return `${asp}: ${nameA} score=${sa.score}, positive=${sa.positive_pct}% | ${nameB} score=${sb.score}, positive=${sb.positive_pct}%`;
+  }).join('\n');
 
-      const fillPct = getFillPercent(feature, val);
-      document.getElementById(`sv-${feature}`).textContent = formatValue(feature, val);
-      document.getElementById(`sf-${feature}`).style.width = `${fillPct}%`;
-      document.getElementById(`st-${feature}`).style.left  = `${fillPct}%`;
+  const prompt = `You are a mobile phone expert. Based on this aspect-level sentiment analysis data from real customer reviews, write a clear 4-5 sentence comparison summary. Be specific about which phone wins in which areas and give a final recommendation.
+
+Phones being compared: "${nameA}" vs "${nameB}"
+
+Sentiment data (score range -100 to +100, higher is better):
+${lines}
+
+Write a helpful, natural summary for a customer trying to decide between these two phones.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
-  });
-}
-
-function bindStepEvents() {
-  document.getElementById('btnNext')?.addEventListener('click', () => {
-    state.step++;
-    render();
-  });
-
-  document.getElementById('btnBack')?.addEventListener('click', () => {
-    state.step--;
-    render();
-  });
-
-  document.getElementById('btnReset')?.addEventListener('click', () => {
-    state.prefs = { ...defaultPrefs };
-    state.dealbreaker = null;
-    state.step = 0;
-    render();
-  });
-
-  document.getElementById('btnFind')?.addEventListener('click', () => {
-    const recs  = getRecommendations(state.prefs, state.dealbreaker);
-    state.results = selectTop3(recs);
-    state.step = 4;
-    render();
-    setTimeout(animateCircles, 100);
-  });
-
-  document.getElementById('btnRestart')?.addEventListener('click', () => {
-    state.prefs = { ...defaultPrefs };
-    state.dealbreaker = null;
-    state.step = 0;
-    state.results = null;
-    render();
-  });
-
-  // Dealbreaker radio
-  document.querySelectorAll('input[name="dealbreaker"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      state.dealbreaker = e.target.value;
-      // Enable button
-      const btn = document.getElementById('btnFind');
-      if (btn) btn.disabled = false;
-    });
-  });
-}
-
-// ============================================================
-//  MAIN RENDER
-// ============================================================
-function render() {
-  renderProgressNav();
-
-  const main = document.getElementById('appMain');
-
-  if (state.step < 4) {
-    main.innerHTML = renderWizardStep(state.step);
-    bindSliderEvents();
-    bindStepEvents();
-  } else {
-    main.innerHTML = renderResults();
-    bindStepEvents();
+    const data = await resp.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'Could not generate summary.';
+    summaryEl.innerHTML = `<div class="ai-summary-text">${text}</div>`;
+  } catch(e) {
+    summaryEl.innerHTML = '<span style="color:var(--text-muted)">AI summary unavailable.</span>';
   }
 }
-
-// ============================================================
-//  BOOT
-// ============================================================
-render();
 </script>
 </body>
 </html>
