@@ -111,9 +111,9 @@ function ResultCard({ item, type }) {
     premium: 'var(--tertiary)',
   };
   const LABELS = {
-    perfect: 'Primary Artifact',
-    budget:  'Secondary Artifact',
-    premium: 'Tertiary Artifact',
+    perfect: 'Perfect Match',
+    budget:  'Budget Pick',
+    premium: 'Premium Upgrade',
   };
   const DELAYS = { perfect: 100, budget: 250, premium: 400 };
 
